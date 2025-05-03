@@ -1,6 +1,6 @@
 package tarefa2;
 
-//eu
+//luciano gatao
 
 import java.sql.Connection;
 import java.sql.Statement;
