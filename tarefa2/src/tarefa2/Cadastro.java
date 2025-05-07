@@ -1,6 +1,5 @@
 package tarefa2;
 
-//luciano gatao s2
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -47,7 +46,7 @@ public class Cadastro extends javax.swing.JFrame {
         ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
         try {
             ResultSet result = statement.executeQuery("SELECT *FROM notebook");
-            while(result.next()){
+            while (result.next()) {
                 String linha[] = {
                     String.valueOf(result.getInt(1)),
                     result.getString(2),
@@ -116,9 +115,19 @@ public class Cadastro extends javax.swing.JFrame {
 
         jButton1.setText("Remover");
         jButton1.setEnabled(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Alterar");
         jButton2.setEnabled(false);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Inserir");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -261,38 +270,64 @@ public class Cadastro extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         limpar();
-        jButton1.setEnabled(false);
-        jButton2.setEnabled(false);
-        jButton3.setEnabled(true);
+        
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        try{
-            if(!CamposPreenchidos()){
+        try {
+            if (!CamposPreenchidos()) {
                 throw new Exception("Todos os campos devem ser preenchidos");
-            }else{
+            } else {
                 System.out.println("Preenchido");
                 InserirRegistroBanco();
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-}
+        }
+        limpar();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        if(evt.getClickCount() == 2){
+        if (evt.getClickCount() == 2) {
             int i = jTable1.getSelectedRow();
-                jTextPane1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
-                jTextPane2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
-                jTextPane3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
-                jTextPane4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
-                jTextPane5.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 4).toString());
-                jButton1.setEnabled(true);
-                jButton2.setEnabled(true);
-                jButton3.setEnabled(false);
-                
+            jTextPane1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
+            jTextPane2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
+            jTextPane3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
+            jTextPane4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
+            jTextPane5.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 4).toString());
+            jButton1.setEnabled(true);
+            jButton2.setEnabled(true);
+            jButton3.setEnabled(false);
+
         }
     }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        try {
+            if (!CamposPreenchidos()) {
+                throw new Exception("Todos os campos devem ser preenchidos");
+            } else {
+                System.out.println("Preenchido");
+                AlterarRegistro();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try {
+            if (!CamposPreenchidos()) {
+                throw new Exception("Todos os campos devem ser preenchidos");
+            } else {
+                System.out.println("Preenchido");
+                RemoverRegistro();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }   
+
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -325,55 +360,107 @@ public class Cadastro extends javax.swing.JFrame {
             }
         });
     }
-    
+
     private void limpar() {
         jTextPane1.setText("");
         jTextPane2.setText("");
         jTextPane3.setText("");
         jTextPane4.setText("");
         jTextPane5.setText("");
+        jButton1.setEnabled(false);
+        jButton2.setEnabled(false);
+        jButton3.setEnabled(true);
     }
-    
-    private boolean CamposPreenchidos(){
-    
-        return !jTextPane2.getText().isEmpty() && 
-               !jTextPane3.getText().isEmpty() && 
-               !jTextPane4.getText().isEmpty() && 
-               !jTextPane5.getText().isEmpty();
+
+    private boolean CamposPreenchidos() {
+
+        return !jTextPane2.getText().isEmpty()
+                && !jTextPane3.getText().isEmpty()
+                && !jTextPane4.getText().isEmpty()
+                && !jTextPane5.getText().isEmpty();
     }
-    
-    private void InserirRegistroBanco() throws SQLException{
-        
-            String processador = jTextPane2.getText();
-            String marca = jTextPane3.getText();
-            String modelo = jTextPane4.getText();
-            int ram =Integer.parseInt(jTextPane5.getText());
-            
-            String sql = "INSERT INTO notebook(processador, marca, modelo, ram) VALUES ('" + processador + "','" + marca + "','"+ modelo +"','"+ ram +"')";
+
+    private void InserirRegistroBanco() throws SQLException {
+        CamposPreenchidos();
+        String processador = jTextPane2.getText().trim();
+        String marca = jTextPane3.getText().trim();
+        String modelo = jTextPane4.getText().trim();
+        int ram = Integer.parseInt(jTextPane5.getText().trim());
+
+        String sql = "INSERT INTO notebook(processador, marca, modelo, ram) VALUES ('" + processador + "','" + marca + "','" + modelo + "','" + ram + "')";
         try {
-                       
+            abrirConexao();
             statement.executeUpdate(sql);
             atualizarTabela();
             JOptionPane.showMessageDialog(this, "Inserido com sucesso!!");
             limpar();
-            
-            
-        } catch(NumberFormatException e){
+
+        } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Campos númericos devem conter números", "ERRO", JOptionPane.ERROR_MESSAGE);
-        }
-        
-        
-        catch (Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
         }
-        
-        
-        fecharConexao();
-    } 
 
-    
-    
-    
+        fecharConexao();
+
+    }
+
+    private void AlterarRegistro() throws SQLException {
+
+        int id = Integer.parseInt(jTextPane1.getText());
+        String processador = jTextPane2.getText();
+        String marca = jTextPane3.getText();
+        String modelo = jTextPane4.getText();
+        int ram = Integer.parseInt(jTextPane5.getText());
+
+        String sql = "UPDATE notebook SET processador = '" + processador + "', marca = '" + marca + "', modelo = '" + modelo + "', ram = '" + ram + "' WHERE id = '" + id + "'";
+
+        try {
+            
+            abrirConexao();
+            statement.executeUpdate(sql);
+            atualizarTabela();
+            JOptionPane.showMessageDialog(this, "Alterado com sucesso!!");
+            limpar();
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Campos númericos devem conter números", "ERRO", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "ERRO", JOptionPane.ERROR_MESSAGE);
+        }
+
+        fecharConexao();
+    }
+
+    private void RemoverRegistro() throws SQLException {
+
+        try {
+            String id = jTextPane1.getText();
+            
+            abrirConexao();
+            if (id.isEmpty()) {
+                throw new IllegalArgumentException("Selecione um registro para remover.");
+            }
+            int resposta = JOptionPane.showConfirmDialog(this, "Deseja realmente remover este registro?", "Confirmação", JOptionPane.YES_NO_OPTION);
+            if (resposta != JOptionPane.YES_OPTION) {
+                return;
+            }
+
+            String sql = "DELETE FROM notebook WHERE id = '" + id + "'";
+
+            statement.executeUpdate(sql);
+            atualizarTabela();
+            JOptionPane.showMessageDialog(this, "Removido com sucesso!!");
+            limpar();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro ao remover", JOptionPane.ERROR_MESSAGE);
+        }
+
+        fecharConexao();
+
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
