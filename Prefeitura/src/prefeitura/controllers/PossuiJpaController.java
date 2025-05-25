@@ -39,9 +39,9 @@ public class PossuiJpaController implements Serializable {
         if (possui.getPossuiPK() == null) {
             possui.setPossuiPK(new PossuiPK());
         }
-        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
         possui.getPossuiPK().setNumeroProcesso(possui.getProcesso().getNumeroProcesso());
         possui.getPossuiPK().setNumeroNota(possui.getNotafiscal().getNumeroNota());
+        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -88,9 +88,9 @@ public class PossuiJpaController implements Serializable {
     }
 
     public void edit(Possui possui) throws NonexistentEntityException, Exception {
-        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
         possui.getPossuiPK().setNumeroProcesso(possui.getProcesso().getNumeroProcesso());
         possui.getPossuiPK().setNumeroNota(possui.getNotafiscal().getNumeroNota());
+        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
         EntityManager em = null;
         try {
             em = getEntityManager();

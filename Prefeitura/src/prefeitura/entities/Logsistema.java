@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -19,8 +18,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  *
@@ -45,11 +42,9 @@ public class Logsistema implements Serializable {
     @Column(name = "Acao")
     private String acao;
     @Column(name = "DataAcao")
-    @Temporal(TemporalType.DATE)
-    private Date dataAcao;
+    private String dataAcao;
     @Column(name = "HoraAcao")
-    @Temporal(TemporalType.TIME)
-    private Date horaAcao;
+    private String horaAcao;
     @ManyToMany(mappedBy = "logsistemaList")
     private List<Usuario> usuarioList;
     @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")
@@ -79,19 +74,19 @@ public class Logsistema implements Serializable {
         this.acao = acao;
     }
 
-    public Date getDataAcao() {
+    public String getDataAcao() {
         return dataAcao;
     }
 
-    public void setDataAcao(Date dataAcao) {
+    public void setDataAcao(String dataAcao) {
         this.dataAcao = dataAcao;
     }
 
-    public Date getHoraAcao() {
+    public String getHoraAcao() {
         return horaAcao;
     }
 
-    public void setHoraAcao(Date horaAcao) {
+    public void setHoraAcao(String horaAcao) {
         this.horaAcao = horaAcao;
     }
 

@@ -46,6 +46,11 @@ public class Secretaria implements Serializable {
     public Secretaria() {
     }
 
+    public Secretaria(Integer idSecretaria, String nomeSecretaria) {
+        this.idSecretaria = idSecretaria;
+        this.nomeSecretaria = nomeSecretaria;
+    }
+
     public Secretaria(Integer idSecretaria) {
         this.idSecretaria = idSecretaria;
     }
@@ -104,7 +109,7 @@ public class Secretaria implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Secretaria[ idSecretaria=" + idSecretaria + " ]";
+        return idSecretaria + " - " + nomeSecretaria;
     }
     
 }

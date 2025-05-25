@@ -4,12 +4,16 @@
  */
 package prefeitura.view;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import prefeitura.controllers.OficioJpaController;
+import prefeitura.controllers.SecretariaJpaController;
+import prefeitura.entities.Secretaria;
 
 /**
  *
@@ -19,59 +23,79 @@ public class Oficio extends javax.swing.JFrame {
 
     EntityManagerFactory factory;
     OficioJpaController oficioController;
+    SecretariaJpaController secretariaController;
     
     public Oficio() {
         initComponents();
         abrirConexao();
+        limpar();
     }
     
      private void abrirConexao(){
         try{
-            factory = Persistence.createEntityManagerFactory("PrefeituraPU");
+            factory = Persistence.createEntityManagerFactory("PrefeituraFuncionandoPU");
             oficioController = new OficioJpaController(factory);
+            secretariaController = new SecretariaJpaController(factory);
         }catch(Exception e){
             JOptionPane.showMessageDialog(this, 
             e.getMessage(),
             "ERRO",
-            JOptionPane.ERROR);
+            JOptionPane.ERROR_MESSAGE);
             
         }
     }
      private void atualizarTabela(){
          ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
-         try{
-             List<prefeitura.entities.Oficio> oficios = oficioController.findOficioEntities();
-             for (prefeitura.entities.Oficio oficio : oficios) {
-                 String linha[] = [
-                 
-                 
-                 
-                 ]
-             }
-         }catch(Exception e){
-            JOptionPane.showMessageDialog(this, 
-            e.getMessage(),
-            "ERRO",
-            JOptionPane.ERROR);
-            
+         try {
+            List<prefeitura.entities.Oficio> oficios = oficioController.findOficioEntities();
+            for (prefeitura.entities.Oficio oficio : oficios) {
+                String linha[] = {
+                    String.valueOf(oficio.getDataOficio()),
+                    String.valueOf(oficio.getNumeroOficio()),
+                    String.valueOf(oficio.getIdSecretaria()),
+                    oficio.getDescricao()                    
+                };
+                ((DefaultTableModel) jTable1.getModel()).addRow(linha);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
         }
      }
      
+     private void limpar() {
+        jTextField1.setText("");
+        jTextField2.setText("");
+        jTextField3.setText("");
+        atualizarTabela();
+        atualizarCombo();
+        jButton3.setEnabled(true);
+        jButton4.setEnabled(false);
+        jButton6.setEnabled(true);
+        jButton5.setEnabled(false);
+        jTextField1.requestFocus();
+    }
+
+    private void atualizarCombo(){
+        jComboBox1.removeAllItems();
+        List<Secretaria> secretarias = secretariaController.findSecretariaEntities();
+        for (Secretaria secretaria : secretarias) {
+            jComboBox1.addItem(secretaria);
+        }
+            
+        }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextPane2 = new javax.swing.JTextPane();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jTextPane3 = new javax.swing.JTextPane();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
         jButton1 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -80,12 +104,12 @@ public class Oficio extends javax.swing.JFrame {
         jScrollPane5 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jComboBox1 = new javax.swing.JComboBox<>();
+        jTextField1 = new javax.swing.JTextField();
+        jTextField2 = new javax.swing.JTextField();
+        jTextField3 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jScrollPane2.setViewportView(jTextPane2);
-
-        jScrollPane3.setViewportView(jTextPane3);
+        setTitle("Cadastro de Ofício");
 
         jLabel1.setText("Data");
 
@@ -95,8 +119,6 @@ public class Oficio extends javax.swing.JFrame {
 
         jLabel4.setText("Descrição");
 
-        jScrollPane1.setViewportView(jTextPane1);
-
         jButton1.setText("Voltar");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -105,8 +127,19 @@ public class Oficio extends javax.swing.JFrame {
         });
 
         jButton3.setText("Inserir");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Deletar");
+        jButton4.setEnabled(false);
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         jButton5.setText("Alterar");
         jButton5.setEnabled(false);
@@ -117,6 +150,11 @@ public class Oficio extends javax.swing.JFrame {
         });
 
         jButton6.setText("Limpar");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -136,6 +174,11 @@ public class Oficio extends javax.swing.JFrame {
         });
         jTable1.setToolTipText("");
         jTable1.getTableHeader().setReorderingAllowed(false);
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane5.setViewportView(jTable1);
         if (jTable1.getColumnModel().getColumnCount() > 0) {
             jTable1.getColumnModel().getColumn(0).setResizable(false);
@@ -144,7 +187,11 @@ public class Oficio extends javax.swing.JFrame {
             jTable1.getColumnModel().getColumn(3).setResizable(false);
         }
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jTextField1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTextField1MouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -166,11 +213,11 @@ public class Oficio extends javax.swing.JFrame {
                                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jScrollPane1)
-                                    .addComponent(jComboBox1, 0, 112, Short.MAX_VALUE))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jComboBox1, 0, 112, Short.MAX_VALUE)
+                                    .addComponent(jTextField1)
+                                    .addComponent(jTextField2)
+                                    .addComponent(jTextField3))
                                 .addGap(197, 197, 197)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -187,21 +234,21 @@ public class Oficio extends javax.swing.JFrame {
                 .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -224,8 +271,95 @@ public class Oficio extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+                                                 
+        String data = jTextField1.getText();
+        String numeroOficio = jTextField2.getText();
+        String descricao = jTextField3.getText();
+        //String idSecretaria = jComboBox1.getItemAt();
+
+        try {
+            if(data.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()){
+                throw new Exception("Preencha todos os campos");
+            }
+            prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(Integer.valueOf(numeroOficio), descricao, data, null);
+            oficioController.edit(oficio);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+        atualizarTabela();
+     
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        limpar();
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        String data = jTextField1.getText();
+        String numeroOficio = jTextField2.getText();
+        String descricao = jTextField3.getText();
+        Secretaria secretaria = (Secretaria) jComboBox1.getSelectedItem();
+
+        try {
+            if(data.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()){
+                throw new Exception("Preencha todos os campos");
+            }
+            prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(Integer.valueOf(numeroOficio), descricao, data, secretaria);
+            oficioController.create(oficio);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+        atualizarTabela();
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jTextField1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextField1MouseClicked
+       jTextField1.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+    }//GEN-LAST:event_jTextField1MouseClicked
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+                                       
+       if(evt.getClickCount() == 2){
+           int i = jTable1.getSelectedRow();
+            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
+            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
+            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());            
+            jButton4.setEnabled(true);
+            jButton5.setEnabled(true);
+            jButton3.setEnabled(false);
+       
+    }
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        Integer numeroOficio = Integer.valueOf(jTextField2.getText());
+            try{
+                if(JOptionPane.showConfirmDialog(this,"Remover o ofício " + numeroOficio + " ?") == JOptionPane.OK_OPTION){
+                    oficioController.destroy(numeroOficio);
+                    JOptionPane.showConfirmDialog(this,
+                            "Ofício " + numeroOficio + " removido com sucesso",
+                            "SUCESSO",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+                limpar();
+            }catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+        atualizarTabela();
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -271,18 +405,15 @@ public class Oficio extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<Secretaria> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JTextPane jTextPane2;
-    private javax.swing.JTextPane jTextPane3;
+    private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
     // End of variables declaration//GEN-END:variables
 }

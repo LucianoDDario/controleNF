@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -20,8 +19,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  *
@@ -44,8 +41,7 @@ public class Processo implements Serializable {
     @Column(name = "TipoProcesso")
     private String tipoProcesso;
     @Column(name = "DataSaidaCompras")
-    @Temporal(TemporalType.DATE)
-    private Date dataSaidaCompras;
+    private String dataSaidaCompras;
     @JoinTable(name = "cria", joinColumns = {
         @JoinColumn(name = "NumeroProcesso", referencedColumnName = "NumeroProcesso")}, inverseJoinColumns = {
         @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")})
@@ -90,11 +86,11 @@ public class Processo implements Serializable {
         this.tipoProcesso = tipoProcesso;
     }
 
-    public Date getDataSaidaCompras() {
+    public String getDataSaidaCompras() {
         return dataSaidaCompras;
     }
 
-    public void setDataSaidaCompras(Date dataSaidaCompras) {
+    public void setDataSaidaCompras(String dataSaidaCompras) {
         this.dataSaidaCompras = dataSaidaCompras;
     }
 

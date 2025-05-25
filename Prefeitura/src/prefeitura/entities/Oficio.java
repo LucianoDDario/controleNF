@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -19,8 +18,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  *
@@ -43,8 +40,7 @@ public class Oficio implements Serializable {
     @Column(name = "Descricao")
     private String descricao;
     @Column(name = "DataOficio")
-    @Temporal(TemporalType.DATE)
-    private Date dataOficio;
+    private String dataOficio;
     @ManyToMany(mappedBy = "oficioList")
     private List<Processo> processoList;
     @JoinTable(name = "envia1", joinColumns = {
@@ -64,6 +60,13 @@ public class Oficio implements Serializable {
     private Secretaria idSecretaria;
 
     public Oficio() {
+    }
+
+    public Oficio(Integer numeroOficio, String descricao, String dataOficio, Secretaria idSecretaria) {
+        this.numeroOficio = numeroOficio;
+        this.descricao = descricao;
+        this.dataOficio = dataOficio;
+        this.idSecretaria = idSecretaria;
     }
 
     public Oficio(Integer numeroOficio) {
@@ -86,11 +89,11 @@ public class Oficio implements Serializable {
         this.descricao = descricao;
     }
 
-    public Date getDataOficio() {
+    public String getDataOficio() {
         return dataOficio;
     }
 
-    public void setDataOficio(Date dataOficio) {
+    public void setDataOficio(String dataOficio) {
         this.dataOficio = dataOficio;
     }
 

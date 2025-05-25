@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -18,8 +17,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 /**
  *
@@ -39,8 +36,7 @@ public class Protocolo implements Serializable {
     @Column(name = "NumeroProtocolo")
     private Integer numeroProtocolo;
     @Column(name = "DataProtocolo")
-    @Temporal(TemporalType.DATE)
-    private Date dataProtocolo;
+    private String dataProtocolo;
     @JoinColumn(name = "NumeroNota", referencedColumnName = "NumeroNota")
     @ManyToOne
     private Notafiscal numeroNota;
@@ -64,11 +60,11 @@ public class Protocolo implements Serializable {
         this.numeroProtocolo = numeroProtocolo;
     }
 
-    public Date getDataProtocolo() {
+    public String getDataProtocolo() {
         return dataProtocolo;
     }
 
-    public void setDataProtocolo(Date dataProtocolo) {
+    public void setDataProtocolo(String dataProtocolo) {
         this.dataProtocolo = dataProtocolo;
     }
 
