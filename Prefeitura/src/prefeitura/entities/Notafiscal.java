@@ -8,13 +8,12 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -31,6 +30,7 @@ import javax.persistence.TemporalType;
 @Table(name = "notafiscal")
 @NamedQueries({
     @NamedQuery(name = "Notafiscal.findAll", query = "SELECT n FROM Notafiscal n"),
+    @NamedQuery(name = "Notafiscal.findByIdNotaFiscal", query = "SELECT n FROM Notafiscal n WHERE n.idNotaFiscal = :idNotaFiscal"),
     @NamedQuery(name = "Notafiscal.findByNumeroNota", query = "SELECT n FROM Notafiscal n WHERE n.numeroNota = :numeroNota"),
     @NamedQuery(name = "Notafiscal.findByDataEmissao", query = "SELECT n FROM Notafiscal n WHERE n.dataEmissao = :dataEmissao"),
     @NamedQuery(name = "Notafiscal.findByValorNota", query = "SELECT n FROM Notafiscal n WHERE n.valorNota = :valorNota")})
@@ -38,7 +38,10 @@ public class Notafiscal implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
+    @Column(name = "IdNotaFiscal")
+    private Integer idNotaFiscal;
     @Column(name = "NumeroNota")
     private Integer numeroNota;
     @Column(name = "DataEmissao")
@@ -46,30 +49,35 @@ public class Notafiscal implements Serializable {
     private Date dataEmissao;
     @Column(name = "ValorNota")
     private Integer valorNota;
-    @JoinTable(name = "envia", joinColumns = {
-        @JoinColumn(name = "NumeroNota", referencedColumnName = "NumeroNota")}, inverseJoinColumns = {
-        @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")})
-    @ManyToMany
-    private List<Fornecedor> fornecedorList;
     @OneToMany(mappedBy = "numeroNota")
-    private List<Protocolo> protocoloList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "notafiscal")
     private List<Possui> possuiList;
+    @OneToMany(mappedBy = "numeroNota")
+    private List<Envia> enviaList;
     @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
     @ManyToOne
     private Fornecedor idFornecedor;
-    @JoinColumn(name = "NumeroProcesso", referencedColumnName = "NumeroProcesso")
+    @JoinColumn(name = "IdProcesso", referencedColumnName = "IdProcesso")
     @ManyToOne
-    private Processo numeroProcesso;
-    @JoinColumn(name = "NumeroProtocolo", referencedColumnName = "NumeroProtocolo")
+    private Processo idProcesso;
+    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
     @ManyToOne
-    private Protocolo numeroProtocolo;
+    private Protocolo idProtocolo;
+    @OneToMany(mappedBy = "numeroNota")
+    private List<Protocolo> protocoloList;
 
     public Notafiscal() {
     }
 
-    public Notafiscal(Integer numeroNota) {
-        this.numeroNota = numeroNota;
+    public Notafiscal(Integer idNotaFiscal) {
+        this.idNotaFiscal = idNotaFiscal;
+    }
+
+    public Integer getIdNotaFiscal() {
+        return idNotaFiscal;
+    }
+
+    public void setIdNotaFiscal(Integer idNotaFiscal) {
+        this.idNotaFiscal = idNotaFiscal;
     }
 
     public Integer getNumeroNota() {
@@ -96,28 +104,20 @@ public class Notafiscal implements Serializable {
         this.valorNota = valorNota;
     }
 
-    public List<Fornecedor> getFornecedorList() {
-        return fornecedorList;
-    }
-
-    public void setFornecedorList(List<Fornecedor> fornecedorList) {
-        this.fornecedorList = fornecedorList;
-    }
-
-    public List<Protocolo> getProtocoloList() {
-        return protocoloList;
-    }
-
-    public void setProtocoloList(List<Protocolo> protocoloList) {
-        this.protocoloList = protocoloList;
-    }
-
     public List<Possui> getPossuiList() {
         return possuiList;
     }
 
     public void setPossuiList(List<Possui> possuiList) {
         this.possuiList = possuiList;
+    }
+
+    public List<Envia> getEnviaList() {
+        return enviaList;
+    }
+
+    public void setEnviaList(List<Envia> enviaList) {
+        this.enviaList = enviaList;
     }
 
     public Fornecedor getIdFornecedor() {
@@ -128,26 +128,34 @@ public class Notafiscal implements Serializable {
         this.idFornecedor = idFornecedor;
     }
 
-    public Processo getNumeroProcesso() {
-        return numeroProcesso;
+    public Processo getIdProcesso() {
+        return idProcesso;
     }
 
-    public void setNumeroProcesso(Processo numeroProcesso) {
-        this.numeroProcesso = numeroProcesso;
+    public void setIdProcesso(Processo idProcesso) {
+        this.idProcesso = idProcesso;
     }
 
-    public Protocolo getNumeroProtocolo() {
-        return numeroProtocolo;
+    public Protocolo getIdProtocolo() {
+        return idProtocolo;
     }
 
-    public void setNumeroProtocolo(Protocolo numeroProtocolo) {
-        this.numeroProtocolo = numeroProtocolo;
+    public void setIdProtocolo(Protocolo idProtocolo) {
+        this.idProtocolo = idProtocolo;
+    }
+
+    public List<Protocolo> getProtocoloList() {
+        return protocoloList;
+    }
+
+    public void setProtocoloList(List<Protocolo> protocoloList) {
+        this.protocoloList = protocoloList;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (numeroNota != null ? numeroNota.hashCode() : 0);
+        hash += (idNotaFiscal != null ? idNotaFiscal.hashCode() : 0);
         return hash;
     }
 
@@ -158,7 +166,7 @@ public class Notafiscal implements Serializable {
             return false;
         }
         Notafiscal other = (Notafiscal) object;
-        if ((this.numeroNota == null && other.numeroNota != null) || (this.numeroNota != null && !this.numeroNota.equals(other.numeroNota))) {
+        if ((this.idNotaFiscal == null && other.idNotaFiscal != null) || (this.idNotaFiscal != null && !this.idNotaFiscal.equals(other.idNotaFiscal))) {
             return false;
         }
         return true;
@@ -166,7 +174,7 @@ public class Notafiscal implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Notafiscal[ numeroNota=" + numeroNota + " ]";
+        return "prefeitura.entities.Notafiscal[ idNotaFiscal=" + idNotaFiscal + " ]";
     }
     
 }

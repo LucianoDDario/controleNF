@@ -22,49 +22,38 @@ import javax.persistence.Table;
  * @author lucia
  */
 @Entity
-@Table(name = "possui")
+@Table(name = "cria")
 @NamedQueries({
-    @NamedQuery(name = "Possui.findAll", query = "SELECT p FROM Possui p"),
-    @NamedQuery(name = "Possui.findByIdPossui", query = "SELECT p FROM Possui p WHERE p.idPossui = :idPossui")})
-public class Possui implements Serializable {
+    @NamedQuery(name = "Cria.findAll", query = "SELECT c FROM Cria c"),
+    @NamedQuery(name = "Cria.findByIdCria", query = "SELECT c FROM Cria c WHERE c.idCria = :idCria")})
+public class Cria implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "IdPossui")
-    private Integer idPossui;
-    @JoinColumn(name = "NumeroNota", referencedColumnName = "NumeroNota")
-    @ManyToOne
-    private Notafiscal numeroNota;
+    @Column(name = "IdCria")
+    private Integer idCria;
     @JoinColumn(name = "NumeroProcesso", referencedColumnName = "NumeroProcesso")
     @ManyToOne
     private Processo numeroProcesso;
-    @JoinColumn(name = "NumeroProtocolo", referencedColumnName = "NumeroProtocolo")
+    @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")
     @ManyToOne
-    private Protocolo numeroProtocolo;
+    private Usuario idUsuario;
 
-    public Possui() {
+    public Cria() {
     }
 
-    public Possui(Integer idPossui) {
-        this.idPossui = idPossui;
+    public Cria(Integer idCria) {
+        this.idCria = idCria;
     }
 
-    public Integer getIdPossui() {
-        return idPossui;
+    public Integer getIdCria() {
+        return idCria;
     }
 
-    public void setIdPossui(Integer idPossui) {
-        this.idPossui = idPossui;
-    }
-
-    public Notafiscal getNumeroNota() {
-        return numeroNota;
-    }
-
-    public void setNumeroNota(Notafiscal numeroNota) {
-        this.numeroNota = numeroNota;
+    public void setIdCria(Integer idCria) {
+        this.idCria = idCria;
     }
 
     public Processo getNumeroProcesso() {
@@ -75,29 +64,29 @@ public class Possui implements Serializable {
         this.numeroProcesso = numeroProcesso;
     }
 
-    public Protocolo getNumeroProtocolo() {
-        return numeroProtocolo;
+    public Usuario getIdUsuario() {
+        return idUsuario;
     }
 
-    public void setNumeroProtocolo(Protocolo numeroProtocolo) {
-        this.numeroProtocolo = numeroProtocolo;
+    public void setIdUsuario(Usuario idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (idPossui != null ? idPossui.hashCode() : 0);
+        hash += (idCria != null ? idCria.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Possui)) {
+        if (!(object instanceof Cria)) {
             return false;
         }
-        Possui other = (Possui) object;
-        if ((this.idPossui == null && other.idPossui != null) || (this.idPossui != null && !this.idPossui.equals(other.idPossui))) {
+        Cria other = (Cria) object;
+        if ((this.idCria == null && other.idCria != null) || (this.idCria != null && !this.idCria.equals(other.idCria))) {
             return false;
         }
         return true;
@@ -105,7 +94,7 @@ public class Possui implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Possui[ idPossui=" + idPossui + " ]";
+        return "prefeitura.entities.Cria[ idCria=" + idCria + " ]";
     }
     
 }

@@ -10,15 +10,16 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import prefeitura.entities.Secretaria;
-import prefeitura.entities.Processo;
+import prefeitura.entities.Possui1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
-import prefeitura.controllers.exceptions.PreexistingEntityException;
+import prefeitura.entities.Envia1;
 import prefeitura.entities.Oficio;
-import prefeitura.entities.Usuario;
+import prefeitura.entities.Processo;
+import prefeitura.entities.Recebe;
 
 /**
  *
@@ -35,18 +36,18 @@ public class OficioJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Oficio oficio) throws PreexistingEntityException, Exception {
+    public void create(Oficio oficio) {
+        if (oficio.getPossui1List() == null) {
+            oficio.setPossui1List(new ArrayList<Possui1>());
+        }
+        if (oficio.getEnvia1List() == null) {
+            oficio.setEnvia1List(new ArrayList<Envia1>());
+        }
         if (oficio.getProcessoList() == null) {
             oficio.setProcessoList(new ArrayList<Processo>());
         }
-        if (oficio.getSecretariaList() == null) {
-            oficio.setSecretariaList(new ArrayList<Secretaria>());
-        }
-        if (oficio.getUsuarioList() == null) {
-            oficio.setUsuarioList(new ArrayList<Usuario>());
-        }
-        if (oficio.getProcessoList1() == null) {
-            oficio.setProcessoList1(new ArrayList<Processo>());
+        if (oficio.getRecebeList() == null) {
+            oficio.setRecebeList(new ArrayList<Recebe>());
         }
         EntityManager em = null;
         try {
@@ -57,62 +58,72 @@ public class OficioJpaController implements Serializable {
                 idSecretaria = em.getReference(idSecretaria.getClass(), idSecretaria.getIdSecretaria());
                 oficio.setIdSecretaria(idSecretaria);
             }
+            List<Possui1> attachedPossui1List = new ArrayList<Possui1>();
+            for (Possui1 possui1ListPossui1ToAttach : oficio.getPossui1List()) {
+                possui1ListPossui1ToAttach = em.getReference(possui1ListPossui1ToAttach.getClass(), possui1ListPossui1ToAttach.getIdPossui1());
+                attachedPossui1List.add(possui1ListPossui1ToAttach);
+            }
+            oficio.setPossui1List(attachedPossui1List);
+            List<Envia1> attachedEnvia1List = new ArrayList<Envia1>();
+            for (Envia1 envia1ListEnvia1ToAttach : oficio.getEnvia1List()) {
+                envia1ListEnvia1ToAttach = em.getReference(envia1ListEnvia1ToAttach.getClass(), envia1ListEnvia1ToAttach.getIdEnvia1());
+                attachedEnvia1List.add(envia1ListEnvia1ToAttach);
+            }
+            oficio.setEnvia1List(attachedEnvia1List);
             List<Processo> attachedProcessoList = new ArrayList<Processo>();
             for (Processo processoListProcessoToAttach : oficio.getProcessoList()) {
-                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getNumeroProcesso());
+                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getIdProcesso());
                 attachedProcessoList.add(processoListProcessoToAttach);
             }
             oficio.setProcessoList(attachedProcessoList);
-            List<Secretaria> attachedSecretariaList = new ArrayList<Secretaria>();
-            for (Secretaria secretariaListSecretariaToAttach : oficio.getSecretariaList()) {
-                secretariaListSecretariaToAttach = em.getReference(secretariaListSecretariaToAttach.getClass(), secretariaListSecretariaToAttach.getIdSecretaria());
-                attachedSecretariaList.add(secretariaListSecretariaToAttach);
+            List<Recebe> attachedRecebeList = new ArrayList<Recebe>();
+            for (Recebe recebeListRecebeToAttach : oficio.getRecebeList()) {
+                recebeListRecebeToAttach = em.getReference(recebeListRecebeToAttach.getClass(), recebeListRecebeToAttach.getIdRecebe());
+                attachedRecebeList.add(recebeListRecebeToAttach);
             }
-            oficio.setSecretariaList(attachedSecretariaList);
-            List<Usuario> attachedUsuarioList = new ArrayList<Usuario>();
-            for (Usuario usuarioListUsuarioToAttach : oficio.getUsuarioList()) {
-                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getIdUsuario());
-                attachedUsuarioList.add(usuarioListUsuarioToAttach);
-            }
-            oficio.setUsuarioList(attachedUsuarioList);
-            List<Processo> attachedProcessoList1 = new ArrayList<Processo>();
-            for (Processo processoList1ProcessoToAttach : oficio.getProcessoList1()) {
-                processoList1ProcessoToAttach = em.getReference(processoList1ProcessoToAttach.getClass(), processoList1ProcessoToAttach.getNumeroProcesso());
-                attachedProcessoList1.add(processoList1ProcessoToAttach);
-            }
-            oficio.setProcessoList1(attachedProcessoList1);
+            oficio.setRecebeList(attachedRecebeList);
             em.persist(oficio);
             if (idSecretaria != null) {
                 idSecretaria.getOficioList().add(oficio);
                 idSecretaria = em.merge(idSecretaria);
             }
+            for (Possui1 possui1ListPossui1 : oficio.getPossui1List()) {
+                Oficio oldNumeroOficioOfPossui1ListPossui1 = possui1ListPossui1.getNumeroOficio();
+                possui1ListPossui1.setNumeroOficio(oficio);
+                possui1ListPossui1 = em.merge(possui1ListPossui1);
+                if (oldNumeroOficioOfPossui1ListPossui1 != null) {
+                    oldNumeroOficioOfPossui1ListPossui1.getPossui1List().remove(possui1ListPossui1);
+                    oldNumeroOficioOfPossui1ListPossui1 = em.merge(oldNumeroOficioOfPossui1ListPossui1);
+                }
+            }
+            for (Envia1 envia1ListEnvia1 : oficio.getEnvia1List()) {
+                Oficio oldNumeroOficioOfEnvia1ListEnvia1 = envia1ListEnvia1.getNumeroOficio();
+                envia1ListEnvia1.setNumeroOficio(oficio);
+                envia1ListEnvia1 = em.merge(envia1ListEnvia1);
+                if (oldNumeroOficioOfEnvia1ListEnvia1 != null) {
+                    oldNumeroOficioOfEnvia1ListEnvia1.getEnvia1List().remove(envia1ListEnvia1);
+                    oldNumeroOficioOfEnvia1ListEnvia1 = em.merge(oldNumeroOficioOfEnvia1ListEnvia1);
+                }
+            }
             for (Processo processoListProcesso : oficio.getProcessoList()) {
-                processoListProcesso.getOficioList().add(oficio);
+                Oficio oldNumeroOficioOfProcessoListProcesso = processoListProcesso.getNumeroOficio();
+                processoListProcesso.setNumeroOficio(oficio);
                 processoListProcesso = em.merge(processoListProcesso);
+                if (oldNumeroOficioOfProcessoListProcesso != null) {
+                    oldNumeroOficioOfProcessoListProcesso.getProcessoList().remove(processoListProcesso);
+                    oldNumeroOficioOfProcessoListProcesso = em.merge(oldNumeroOficioOfProcessoListProcesso);
+                }
             }
-            for (Secretaria secretariaListSecretaria : oficio.getSecretariaList()) {
-                secretariaListSecretaria.getOficioList().add(oficio);
-                secretariaListSecretaria = em.merge(secretariaListSecretaria);
-            }
-            for (Usuario usuarioListUsuario : oficio.getUsuarioList()) {
-                usuarioListUsuario.getOficioList().add(oficio);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-            }
-            for (Processo processoList1Processo : oficio.getProcessoList1()) {
-                Oficio oldNumeroOficioOfProcessoList1Processo = processoList1Processo.getNumeroOficio();
-                processoList1Processo.setNumeroOficio(oficio);
-                processoList1Processo = em.merge(processoList1Processo);
-                if (oldNumeroOficioOfProcessoList1Processo != null) {
-                    oldNumeroOficioOfProcessoList1Processo.getProcessoList1().remove(processoList1Processo);
-                    oldNumeroOficioOfProcessoList1Processo = em.merge(oldNumeroOficioOfProcessoList1Processo);
+            for (Recebe recebeListRecebe : oficio.getRecebeList()) {
+                Oficio oldNumeroOficioOfRecebeListRecebe = recebeListRecebe.getNumeroOficio();
+                recebeListRecebe.setNumeroOficio(oficio);
+                recebeListRecebe = em.merge(recebeListRecebe);
+                if (oldNumeroOficioOfRecebeListRecebe != null) {
+                    oldNumeroOficioOfRecebeListRecebe.getRecebeList().remove(recebeListRecebe);
+                    oldNumeroOficioOfRecebeListRecebe = em.merge(oldNumeroOficioOfRecebeListRecebe);
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findOficio(oficio.getNumeroOficio()) != null) {
-                throw new PreexistingEntityException("Oficio " + oficio + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -125,49 +136,49 @@ public class OficioJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Oficio persistentOficio = em.find(Oficio.class, oficio.getNumeroOficio());
+            Oficio persistentOficio = em.find(Oficio.class, oficio.getIdOficio());
             Secretaria idSecretariaOld = persistentOficio.getIdSecretaria();
             Secretaria idSecretariaNew = oficio.getIdSecretaria();
+            List<Possui1> possui1ListOld = persistentOficio.getPossui1List();
+            List<Possui1> possui1ListNew = oficio.getPossui1List();
+            List<Envia1> envia1ListOld = persistentOficio.getEnvia1List();
+            List<Envia1> envia1ListNew = oficio.getEnvia1List();
             List<Processo> processoListOld = persistentOficio.getProcessoList();
             List<Processo> processoListNew = oficio.getProcessoList();
-            List<Secretaria> secretariaListOld = persistentOficio.getSecretariaList();
-            List<Secretaria> secretariaListNew = oficio.getSecretariaList();
-            List<Usuario> usuarioListOld = persistentOficio.getUsuarioList();
-            List<Usuario> usuarioListNew = oficio.getUsuarioList();
-            List<Processo> processoList1Old = persistentOficio.getProcessoList1();
-            List<Processo> processoList1New = oficio.getProcessoList1();
+            List<Recebe> recebeListOld = persistentOficio.getRecebeList();
+            List<Recebe> recebeListNew = oficio.getRecebeList();
             if (idSecretariaNew != null) {
                 idSecretariaNew = em.getReference(idSecretariaNew.getClass(), idSecretariaNew.getIdSecretaria());
                 oficio.setIdSecretaria(idSecretariaNew);
             }
+            List<Possui1> attachedPossui1ListNew = new ArrayList<Possui1>();
+            for (Possui1 possui1ListNewPossui1ToAttach : possui1ListNew) {
+                possui1ListNewPossui1ToAttach = em.getReference(possui1ListNewPossui1ToAttach.getClass(), possui1ListNewPossui1ToAttach.getIdPossui1());
+                attachedPossui1ListNew.add(possui1ListNewPossui1ToAttach);
+            }
+            possui1ListNew = attachedPossui1ListNew;
+            oficio.setPossui1List(possui1ListNew);
+            List<Envia1> attachedEnvia1ListNew = new ArrayList<Envia1>();
+            for (Envia1 envia1ListNewEnvia1ToAttach : envia1ListNew) {
+                envia1ListNewEnvia1ToAttach = em.getReference(envia1ListNewEnvia1ToAttach.getClass(), envia1ListNewEnvia1ToAttach.getIdEnvia1());
+                attachedEnvia1ListNew.add(envia1ListNewEnvia1ToAttach);
+            }
+            envia1ListNew = attachedEnvia1ListNew;
+            oficio.setEnvia1List(envia1ListNew);
             List<Processo> attachedProcessoListNew = new ArrayList<Processo>();
             for (Processo processoListNewProcessoToAttach : processoListNew) {
-                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getNumeroProcesso());
+                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getIdProcesso());
                 attachedProcessoListNew.add(processoListNewProcessoToAttach);
             }
             processoListNew = attachedProcessoListNew;
             oficio.setProcessoList(processoListNew);
-            List<Secretaria> attachedSecretariaListNew = new ArrayList<Secretaria>();
-            for (Secretaria secretariaListNewSecretariaToAttach : secretariaListNew) {
-                secretariaListNewSecretariaToAttach = em.getReference(secretariaListNewSecretariaToAttach.getClass(), secretariaListNewSecretariaToAttach.getIdSecretaria());
-                attachedSecretariaListNew.add(secretariaListNewSecretariaToAttach);
+            List<Recebe> attachedRecebeListNew = new ArrayList<Recebe>();
+            for (Recebe recebeListNewRecebeToAttach : recebeListNew) {
+                recebeListNewRecebeToAttach = em.getReference(recebeListNewRecebeToAttach.getClass(), recebeListNewRecebeToAttach.getIdRecebe());
+                attachedRecebeListNew.add(recebeListNewRecebeToAttach);
             }
-            secretariaListNew = attachedSecretariaListNew;
-            oficio.setSecretariaList(secretariaListNew);
-            List<Usuario> attachedUsuarioListNew = new ArrayList<Usuario>();
-            for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
-                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getIdUsuario());
-                attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
-            }
-            usuarioListNew = attachedUsuarioListNew;
-            oficio.setUsuarioList(usuarioListNew);
-            List<Processo> attachedProcessoList1New = new ArrayList<Processo>();
-            for (Processo processoList1NewProcessoToAttach : processoList1New) {
-                processoList1NewProcessoToAttach = em.getReference(processoList1NewProcessoToAttach.getClass(), processoList1NewProcessoToAttach.getNumeroProcesso());
-                attachedProcessoList1New.add(processoList1NewProcessoToAttach);
-            }
-            processoList1New = attachedProcessoList1New;
-            oficio.setProcessoList1(processoList1New);
+            recebeListNew = attachedRecebeListNew;
+            oficio.setRecebeList(recebeListNew);
             oficio = em.merge(oficio);
             if (idSecretariaOld != null && !idSecretariaOld.equals(idSecretariaNew)) {
                 idSecretariaOld.getOficioList().remove(oficio);
@@ -177,56 +188,71 @@ public class OficioJpaController implements Serializable {
                 idSecretariaNew.getOficioList().add(oficio);
                 idSecretariaNew = em.merge(idSecretariaNew);
             }
+            for (Possui1 possui1ListOldPossui1 : possui1ListOld) {
+                if (!possui1ListNew.contains(possui1ListOldPossui1)) {
+                    possui1ListOldPossui1.setNumeroOficio(null);
+                    possui1ListOldPossui1 = em.merge(possui1ListOldPossui1);
+                }
+            }
+            for (Possui1 possui1ListNewPossui1 : possui1ListNew) {
+                if (!possui1ListOld.contains(possui1ListNewPossui1)) {
+                    Oficio oldNumeroOficioOfPossui1ListNewPossui1 = possui1ListNewPossui1.getNumeroOficio();
+                    possui1ListNewPossui1.setNumeroOficio(oficio);
+                    possui1ListNewPossui1 = em.merge(possui1ListNewPossui1);
+                    if (oldNumeroOficioOfPossui1ListNewPossui1 != null && !oldNumeroOficioOfPossui1ListNewPossui1.equals(oficio)) {
+                        oldNumeroOficioOfPossui1ListNewPossui1.getPossui1List().remove(possui1ListNewPossui1);
+                        oldNumeroOficioOfPossui1ListNewPossui1 = em.merge(oldNumeroOficioOfPossui1ListNewPossui1);
+                    }
+                }
+            }
+            for (Envia1 envia1ListOldEnvia1 : envia1ListOld) {
+                if (!envia1ListNew.contains(envia1ListOldEnvia1)) {
+                    envia1ListOldEnvia1.setNumeroOficio(null);
+                    envia1ListOldEnvia1 = em.merge(envia1ListOldEnvia1);
+                }
+            }
+            for (Envia1 envia1ListNewEnvia1 : envia1ListNew) {
+                if (!envia1ListOld.contains(envia1ListNewEnvia1)) {
+                    Oficio oldNumeroOficioOfEnvia1ListNewEnvia1 = envia1ListNewEnvia1.getNumeroOficio();
+                    envia1ListNewEnvia1.setNumeroOficio(oficio);
+                    envia1ListNewEnvia1 = em.merge(envia1ListNewEnvia1);
+                    if (oldNumeroOficioOfEnvia1ListNewEnvia1 != null && !oldNumeroOficioOfEnvia1ListNewEnvia1.equals(oficio)) {
+                        oldNumeroOficioOfEnvia1ListNewEnvia1.getEnvia1List().remove(envia1ListNewEnvia1);
+                        oldNumeroOficioOfEnvia1ListNewEnvia1 = em.merge(oldNumeroOficioOfEnvia1ListNewEnvia1);
+                    }
+                }
+            }
             for (Processo processoListOldProcesso : processoListOld) {
                 if (!processoListNew.contains(processoListOldProcesso)) {
-                    processoListOldProcesso.getOficioList().remove(oficio);
+                    processoListOldProcesso.setNumeroOficio(null);
                     processoListOldProcesso = em.merge(processoListOldProcesso);
                 }
             }
             for (Processo processoListNewProcesso : processoListNew) {
                 if (!processoListOld.contains(processoListNewProcesso)) {
-                    processoListNewProcesso.getOficioList().add(oficio);
+                    Oficio oldNumeroOficioOfProcessoListNewProcesso = processoListNewProcesso.getNumeroOficio();
+                    processoListNewProcesso.setNumeroOficio(oficio);
                     processoListNewProcesso = em.merge(processoListNewProcesso);
+                    if (oldNumeroOficioOfProcessoListNewProcesso != null && !oldNumeroOficioOfProcessoListNewProcesso.equals(oficio)) {
+                        oldNumeroOficioOfProcessoListNewProcesso.getProcessoList().remove(processoListNewProcesso);
+                        oldNumeroOficioOfProcessoListNewProcesso = em.merge(oldNumeroOficioOfProcessoListNewProcesso);
+                    }
                 }
             }
-            for (Secretaria secretariaListOldSecretaria : secretariaListOld) {
-                if (!secretariaListNew.contains(secretariaListOldSecretaria)) {
-                    secretariaListOldSecretaria.getOficioList().remove(oficio);
-                    secretariaListOldSecretaria = em.merge(secretariaListOldSecretaria);
+            for (Recebe recebeListOldRecebe : recebeListOld) {
+                if (!recebeListNew.contains(recebeListOldRecebe)) {
+                    recebeListOldRecebe.setNumeroOficio(null);
+                    recebeListOldRecebe = em.merge(recebeListOldRecebe);
                 }
             }
-            for (Secretaria secretariaListNewSecretaria : secretariaListNew) {
-                if (!secretariaListOld.contains(secretariaListNewSecretaria)) {
-                    secretariaListNewSecretaria.getOficioList().add(oficio);
-                    secretariaListNewSecretaria = em.merge(secretariaListNewSecretaria);
-                }
-            }
-            for (Usuario usuarioListOldUsuario : usuarioListOld) {
-                if (!usuarioListNew.contains(usuarioListOldUsuario)) {
-                    usuarioListOldUsuario.getOficioList().remove(oficio);
-                    usuarioListOldUsuario = em.merge(usuarioListOldUsuario);
-                }
-            }
-            for (Usuario usuarioListNewUsuario : usuarioListNew) {
-                if (!usuarioListOld.contains(usuarioListNewUsuario)) {
-                    usuarioListNewUsuario.getOficioList().add(oficio);
-                    usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
-                }
-            }
-            for (Processo processoList1OldProcesso : processoList1Old) {
-                if (!processoList1New.contains(processoList1OldProcesso)) {
-                    processoList1OldProcesso.setNumeroOficio(null);
-                    processoList1OldProcesso = em.merge(processoList1OldProcesso);
-                }
-            }
-            for (Processo processoList1NewProcesso : processoList1New) {
-                if (!processoList1Old.contains(processoList1NewProcesso)) {
-                    Oficio oldNumeroOficioOfProcessoList1NewProcesso = processoList1NewProcesso.getNumeroOficio();
-                    processoList1NewProcesso.setNumeroOficio(oficio);
-                    processoList1NewProcesso = em.merge(processoList1NewProcesso);
-                    if (oldNumeroOficioOfProcessoList1NewProcesso != null && !oldNumeroOficioOfProcessoList1NewProcesso.equals(oficio)) {
-                        oldNumeroOficioOfProcessoList1NewProcesso.getProcessoList1().remove(processoList1NewProcesso);
-                        oldNumeroOficioOfProcessoList1NewProcesso = em.merge(oldNumeroOficioOfProcessoList1NewProcesso);
+            for (Recebe recebeListNewRecebe : recebeListNew) {
+                if (!recebeListOld.contains(recebeListNewRecebe)) {
+                    Oficio oldNumeroOficioOfRecebeListNewRecebe = recebeListNewRecebe.getNumeroOficio();
+                    recebeListNewRecebe.setNumeroOficio(oficio);
+                    recebeListNewRecebe = em.merge(recebeListNewRecebe);
+                    if (oldNumeroOficioOfRecebeListNewRecebe != null && !oldNumeroOficioOfRecebeListNewRecebe.equals(oficio)) {
+                        oldNumeroOficioOfRecebeListNewRecebe.getRecebeList().remove(recebeListNewRecebe);
+                        oldNumeroOficioOfRecebeListNewRecebe = em.merge(oldNumeroOficioOfRecebeListNewRecebe);
                     }
                 }
             }
@@ -234,7 +260,7 @@ public class OficioJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = oficio.getNumeroOficio();
+                Integer id = oficio.getIdOficio();
                 if (findOficio(id) == null) {
                     throw new NonexistentEntityException("The oficio with id " + id + " no longer exists.");
                 }
@@ -255,7 +281,7 @@ public class OficioJpaController implements Serializable {
             Oficio oficio;
             try {
                 oficio = em.getReference(Oficio.class, id);
-                oficio.getNumeroOficio();
+                oficio.getIdOficio();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The oficio with id " + id + " no longer exists.", enfe);
             }
@@ -264,25 +290,25 @@ public class OficioJpaController implements Serializable {
                 idSecretaria.getOficioList().remove(oficio);
                 idSecretaria = em.merge(idSecretaria);
             }
+            List<Possui1> possui1List = oficio.getPossui1List();
+            for (Possui1 possui1ListPossui1 : possui1List) {
+                possui1ListPossui1.setNumeroOficio(null);
+                possui1ListPossui1 = em.merge(possui1ListPossui1);
+            }
+            List<Envia1> envia1List = oficio.getEnvia1List();
+            for (Envia1 envia1ListEnvia1 : envia1List) {
+                envia1ListEnvia1.setNumeroOficio(null);
+                envia1ListEnvia1 = em.merge(envia1ListEnvia1);
+            }
             List<Processo> processoList = oficio.getProcessoList();
             for (Processo processoListProcesso : processoList) {
-                processoListProcesso.getOficioList().remove(oficio);
+                processoListProcesso.setNumeroOficio(null);
                 processoListProcesso = em.merge(processoListProcesso);
             }
-            List<Secretaria> secretariaList = oficio.getSecretariaList();
-            for (Secretaria secretariaListSecretaria : secretariaList) {
-                secretariaListSecretaria.getOficioList().remove(oficio);
-                secretariaListSecretaria = em.merge(secretariaListSecretaria);
-            }
-            List<Usuario> usuarioList = oficio.getUsuarioList();
-            for (Usuario usuarioListUsuario : usuarioList) {
-                usuarioListUsuario.getOficioList().remove(oficio);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-            }
-            List<Processo> processoList1 = oficio.getProcessoList1();
-            for (Processo processoList1Processo : processoList1) {
-                processoList1Processo.setNumeroOficio(null);
-                processoList1Processo = em.merge(processoList1Processo);
+            List<Recebe> recebeList = oficio.getRecebeList();
+            for (Recebe recebeListRecebe : recebeList) {
+                recebeListRecebe.setNumeroOficio(null);
+                recebeListRecebe = em.merge(recebeListRecebe);
             }
             em.remove(oficio);
             em.getTransaction().commit();

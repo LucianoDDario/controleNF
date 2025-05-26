@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -38,10 +37,10 @@ public class Secretaria implements Serializable {
     private Integer idSecretaria;
     @Column(name = "NomeSecretaria")
     private String nomeSecretaria;
-    @ManyToMany(mappedBy = "secretariaList")
+    @OneToMany(mappedBy = "idSecretaria")
     private List<Oficio> oficioList;
     @OneToMany(mappedBy = "idSecretaria")
-    private List<Oficio> oficioList1;
+    private List<Envia1> envia1List;
 
     public Secretaria() {
     }
@@ -79,12 +78,12 @@ public class Secretaria implements Serializable {
         this.oficioList = oficioList;
     }
 
-    public List<Oficio> getOficioList1() {
-        return oficioList1;
+    public List<Envia1> getEnvia1List() {
+        return envia1List;
     }
 
-    public void setOficioList1(List<Oficio> oficioList1) {
-        this.oficioList1 = oficioList1;
+    public void setEnvia1List(List<Envia1> envia1List) {
+        this.envia1List = envia1List;
     }
 
     @Override

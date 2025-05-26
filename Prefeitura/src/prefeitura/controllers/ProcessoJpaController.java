@@ -11,16 +11,15 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import prefeitura.entities.Fornecedor;
 import prefeitura.entities.Oficio;
-import prefeitura.entities.Usuario;
+import prefeitura.entities.Possui;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import prefeitura.controllers.exceptions.IllegalOrphanException;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
-import prefeitura.controllers.exceptions.PreexistingEntityException;
-import prefeitura.entities.Possui;
 import prefeitura.entities.Notafiscal;
+import prefeitura.entities.Cria;
+import prefeitura.entities.Possui1;
 import prefeitura.entities.Processo;
 
 /**
@@ -38,18 +37,18 @@ public class ProcessoJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Processo processo) throws PreexistingEntityException, Exception {
-        if (processo.getUsuarioList() == null) {
-            processo.setUsuarioList(new ArrayList<Usuario>());
-        }
-        if (processo.getOficioList() == null) {
-            processo.setOficioList(new ArrayList<Oficio>());
-        }
+    public void create(Processo processo) {
         if (processo.getPossuiList() == null) {
             processo.setPossuiList(new ArrayList<Possui>());
         }
         if (processo.getNotafiscalList() == null) {
             processo.setNotafiscalList(new ArrayList<Notafiscal>());
+        }
+        if (processo.getCriaList() == null) {
+            processo.setCriaList(new ArrayList<Cria>());
+        }
+        if (processo.getPossui1List() == null) {
+            processo.setPossui1List(new ArrayList<Possui1>());
         }
         EntityManager em = null;
         try {
@@ -62,33 +61,33 @@ public class ProcessoJpaController implements Serializable {
             }
             Oficio numeroOficio = processo.getNumeroOficio();
             if (numeroOficio != null) {
-                numeroOficio = em.getReference(numeroOficio.getClass(), numeroOficio.getNumeroOficio());
+                numeroOficio = em.getReference(numeroOficio.getClass(), numeroOficio.getIdOficio());
                 processo.setNumeroOficio(numeroOficio);
             }
-            List<Usuario> attachedUsuarioList = new ArrayList<Usuario>();
-            for (Usuario usuarioListUsuarioToAttach : processo.getUsuarioList()) {
-                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getIdUsuario());
-                attachedUsuarioList.add(usuarioListUsuarioToAttach);
-            }
-            processo.setUsuarioList(attachedUsuarioList);
-            List<Oficio> attachedOficioList = new ArrayList<Oficio>();
-            for (Oficio oficioListOficioToAttach : processo.getOficioList()) {
-                oficioListOficioToAttach = em.getReference(oficioListOficioToAttach.getClass(), oficioListOficioToAttach.getNumeroOficio());
-                attachedOficioList.add(oficioListOficioToAttach);
-            }
-            processo.setOficioList(attachedOficioList);
             List<Possui> attachedPossuiList = new ArrayList<Possui>();
             for (Possui possuiListPossuiToAttach : processo.getPossuiList()) {
-                possuiListPossuiToAttach = em.getReference(possuiListPossuiToAttach.getClass(), possuiListPossuiToAttach.getPossuiPK());
+                possuiListPossuiToAttach = em.getReference(possuiListPossuiToAttach.getClass(), possuiListPossuiToAttach.getIdPossui());
                 attachedPossuiList.add(possuiListPossuiToAttach);
             }
             processo.setPossuiList(attachedPossuiList);
             List<Notafiscal> attachedNotafiscalList = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNotafiscalToAttach : processo.getNotafiscalList()) {
-                notafiscalListNotafiscalToAttach = em.getReference(notafiscalListNotafiscalToAttach.getClass(), notafiscalListNotafiscalToAttach.getNumeroNota());
+                notafiscalListNotafiscalToAttach = em.getReference(notafiscalListNotafiscalToAttach.getClass(), notafiscalListNotafiscalToAttach.getIdNotaFiscal());
                 attachedNotafiscalList.add(notafiscalListNotafiscalToAttach);
             }
             processo.setNotafiscalList(attachedNotafiscalList);
+            List<Cria> attachedCriaList = new ArrayList<Cria>();
+            for (Cria criaListCriaToAttach : processo.getCriaList()) {
+                criaListCriaToAttach = em.getReference(criaListCriaToAttach.getClass(), criaListCriaToAttach.getIdCria());
+                attachedCriaList.add(criaListCriaToAttach);
+            }
+            processo.setCriaList(attachedCriaList);
+            List<Possui1> attachedPossui1List = new ArrayList<Possui1>();
+            for (Possui1 possui1ListPossui1ToAttach : processo.getPossui1List()) {
+                possui1ListPossui1ToAttach = em.getReference(possui1ListPossui1ToAttach.getClass(), possui1ListPossui1ToAttach.getIdPossui1());
+                attachedPossui1List.add(possui1ListPossui1ToAttach);
+            }
+            processo.setPossui1List(attachedPossui1List);
             em.persist(processo);
             if (idFornecedor != null) {
                 idFornecedor.getProcessoList().add(processo);
@@ -98,38 +97,43 @@ public class ProcessoJpaController implements Serializable {
                 numeroOficio.getProcessoList().add(processo);
                 numeroOficio = em.merge(numeroOficio);
             }
-            for (Usuario usuarioListUsuario : processo.getUsuarioList()) {
-                usuarioListUsuario.getProcessoList().add(processo);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-            }
-            for (Oficio oficioListOficio : processo.getOficioList()) {
-                oficioListOficio.getProcessoList().add(processo);
-                oficioListOficio = em.merge(oficioListOficio);
-            }
             for (Possui possuiListPossui : processo.getPossuiList()) {
-                Processo oldProcessoOfPossuiListPossui = possuiListPossui.getProcesso();
-                possuiListPossui.setProcesso(processo);
+                Processo oldNumeroProcessoOfPossuiListPossui = possuiListPossui.getNumeroProcesso();
+                possuiListPossui.setNumeroProcesso(processo);
                 possuiListPossui = em.merge(possuiListPossui);
-                if (oldProcessoOfPossuiListPossui != null) {
-                    oldProcessoOfPossuiListPossui.getPossuiList().remove(possuiListPossui);
-                    oldProcessoOfPossuiListPossui = em.merge(oldProcessoOfPossuiListPossui);
+                if (oldNumeroProcessoOfPossuiListPossui != null) {
+                    oldNumeroProcessoOfPossuiListPossui.getPossuiList().remove(possuiListPossui);
+                    oldNumeroProcessoOfPossuiListPossui = em.merge(oldNumeroProcessoOfPossuiListPossui);
                 }
             }
             for (Notafiscal notafiscalListNotafiscal : processo.getNotafiscalList()) {
-                Processo oldNumeroProcessoOfNotafiscalListNotafiscal = notafiscalListNotafiscal.getNumeroProcesso();
-                notafiscalListNotafiscal.setNumeroProcesso(processo);
+                Processo oldIdProcessoOfNotafiscalListNotafiscal = notafiscalListNotafiscal.getIdProcesso();
+                notafiscalListNotafiscal.setIdProcesso(processo);
                 notafiscalListNotafiscal = em.merge(notafiscalListNotafiscal);
-                if (oldNumeroProcessoOfNotafiscalListNotafiscal != null) {
-                    oldNumeroProcessoOfNotafiscalListNotafiscal.getNotafiscalList().remove(notafiscalListNotafiscal);
-                    oldNumeroProcessoOfNotafiscalListNotafiscal = em.merge(oldNumeroProcessoOfNotafiscalListNotafiscal);
+                if (oldIdProcessoOfNotafiscalListNotafiscal != null) {
+                    oldIdProcessoOfNotafiscalListNotafiscal.getNotafiscalList().remove(notafiscalListNotafiscal);
+                    oldIdProcessoOfNotafiscalListNotafiscal = em.merge(oldIdProcessoOfNotafiscalListNotafiscal);
+                }
+            }
+            for (Cria criaListCria : processo.getCriaList()) {
+                Processo oldNumeroProcessoOfCriaListCria = criaListCria.getNumeroProcesso();
+                criaListCria.setNumeroProcesso(processo);
+                criaListCria = em.merge(criaListCria);
+                if (oldNumeroProcessoOfCriaListCria != null) {
+                    oldNumeroProcessoOfCriaListCria.getCriaList().remove(criaListCria);
+                    oldNumeroProcessoOfCriaListCria = em.merge(oldNumeroProcessoOfCriaListCria);
+                }
+            }
+            for (Possui1 possui1ListPossui1 : processo.getPossui1List()) {
+                Processo oldNumeroProcessoOfPossui1ListPossui1 = possui1ListPossui1.getNumeroProcesso();
+                possui1ListPossui1.setNumeroProcesso(processo);
+                possui1ListPossui1 = em.merge(possui1ListPossui1);
+                if (oldNumeroProcessoOfPossui1ListPossui1 != null) {
+                    oldNumeroProcessoOfPossui1ListPossui1.getPossui1List().remove(possui1ListPossui1);
+                    oldNumeroProcessoOfPossui1ListPossui1 = em.merge(oldNumeroProcessoOfPossui1ListPossui1);
                 }
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findProcesso(processo.getNumeroProcesso()) != null) {
-                throw new PreexistingEntityException("Processo " + processo + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -137,72 +141,60 @@ public class ProcessoJpaController implements Serializable {
         }
     }
 
-    public void edit(Processo processo) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(Processo processo) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Processo persistentProcesso = em.find(Processo.class, processo.getNumeroProcesso());
+            Processo persistentProcesso = em.find(Processo.class, processo.getIdProcesso());
             Fornecedor idFornecedorOld = persistentProcesso.getIdFornecedor();
             Fornecedor idFornecedorNew = processo.getIdFornecedor();
             Oficio numeroOficioOld = persistentProcesso.getNumeroOficio();
             Oficio numeroOficioNew = processo.getNumeroOficio();
-            List<Usuario> usuarioListOld = persistentProcesso.getUsuarioList();
-            List<Usuario> usuarioListNew = processo.getUsuarioList();
-            List<Oficio> oficioListOld = persistentProcesso.getOficioList();
-            List<Oficio> oficioListNew = processo.getOficioList();
             List<Possui> possuiListOld = persistentProcesso.getPossuiList();
             List<Possui> possuiListNew = processo.getPossuiList();
             List<Notafiscal> notafiscalListOld = persistentProcesso.getNotafiscalList();
             List<Notafiscal> notafiscalListNew = processo.getNotafiscalList();
-            List<String> illegalOrphanMessages = null;
-            for (Possui possuiListOldPossui : possuiListOld) {
-                if (!possuiListNew.contains(possuiListOldPossui)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Possui " + possuiListOldPossui + " since its processo field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
+            List<Cria> criaListOld = persistentProcesso.getCriaList();
+            List<Cria> criaListNew = processo.getCriaList();
+            List<Possui1> possui1ListOld = persistentProcesso.getPossui1List();
+            List<Possui1> possui1ListNew = processo.getPossui1List();
             if (idFornecedorNew != null) {
                 idFornecedorNew = em.getReference(idFornecedorNew.getClass(), idFornecedorNew.getIdFornecedor());
                 processo.setIdFornecedor(idFornecedorNew);
             }
             if (numeroOficioNew != null) {
-                numeroOficioNew = em.getReference(numeroOficioNew.getClass(), numeroOficioNew.getNumeroOficio());
+                numeroOficioNew = em.getReference(numeroOficioNew.getClass(), numeroOficioNew.getIdOficio());
                 processo.setNumeroOficio(numeroOficioNew);
             }
-            List<Usuario> attachedUsuarioListNew = new ArrayList<Usuario>();
-            for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
-                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getIdUsuario());
-                attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
-            }
-            usuarioListNew = attachedUsuarioListNew;
-            processo.setUsuarioList(usuarioListNew);
-            List<Oficio> attachedOficioListNew = new ArrayList<Oficio>();
-            for (Oficio oficioListNewOficioToAttach : oficioListNew) {
-                oficioListNewOficioToAttach = em.getReference(oficioListNewOficioToAttach.getClass(), oficioListNewOficioToAttach.getNumeroOficio());
-                attachedOficioListNew.add(oficioListNewOficioToAttach);
-            }
-            oficioListNew = attachedOficioListNew;
-            processo.setOficioList(oficioListNew);
             List<Possui> attachedPossuiListNew = new ArrayList<Possui>();
             for (Possui possuiListNewPossuiToAttach : possuiListNew) {
-                possuiListNewPossuiToAttach = em.getReference(possuiListNewPossuiToAttach.getClass(), possuiListNewPossuiToAttach.getPossuiPK());
+                possuiListNewPossuiToAttach = em.getReference(possuiListNewPossuiToAttach.getClass(), possuiListNewPossuiToAttach.getIdPossui());
                 attachedPossuiListNew.add(possuiListNewPossuiToAttach);
             }
             possuiListNew = attachedPossuiListNew;
             processo.setPossuiList(possuiListNew);
             List<Notafiscal> attachedNotafiscalListNew = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNewNotafiscalToAttach : notafiscalListNew) {
-                notafiscalListNewNotafiscalToAttach = em.getReference(notafiscalListNewNotafiscalToAttach.getClass(), notafiscalListNewNotafiscalToAttach.getNumeroNota());
+                notafiscalListNewNotafiscalToAttach = em.getReference(notafiscalListNewNotafiscalToAttach.getClass(), notafiscalListNewNotafiscalToAttach.getIdNotaFiscal());
                 attachedNotafiscalListNew.add(notafiscalListNewNotafiscalToAttach);
             }
             notafiscalListNew = attachedNotafiscalListNew;
             processo.setNotafiscalList(notafiscalListNew);
+            List<Cria> attachedCriaListNew = new ArrayList<Cria>();
+            for (Cria criaListNewCriaToAttach : criaListNew) {
+                criaListNewCriaToAttach = em.getReference(criaListNewCriaToAttach.getClass(), criaListNewCriaToAttach.getIdCria());
+                attachedCriaListNew.add(criaListNewCriaToAttach);
+            }
+            criaListNew = attachedCriaListNew;
+            processo.setCriaList(criaListNew);
+            List<Possui1> attachedPossui1ListNew = new ArrayList<Possui1>();
+            for (Possui1 possui1ListNewPossui1ToAttach : possui1ListNew) {
+                possui1ListNewPossui1ToAttach = em.getReference(possui1ListNewPossui1ToAttach.getClass(), possui1ListNewPossui1ToAttach.getIdPossui1());
+                attachedPossui1ListNew.add(possui1ListNewPossui1ToAttach);
+            }
+            possui1ListNew = attachedPossui1ListNew;
+            processo.setPossui1List(possui1ListNew);
             processo = em.merge(processo);
             if (idFornecedorOld != null && !idFornecedorOld.equals(idFornecedorNew)) {
                 idFornecedorOld.getProcessoList().remove(processo);
@@ -220,55 +212,71 @@ public class ProcessoJpaController implements Serializable {
                 numeroOficioNew.getProcessoList().add(processo);
                 numeroOficioNew = em.merge(numeroOficioNew);
             }
-            for (Usuario usuarioListOldUsuario : usuarioListOld) {
-                if (!usuarioListNew.contains(usuarioListOldUsuario)) {
-                    usuarioListOldUsuario.getProcessoList().remove(processo);
-                    usuarioListOldUsuario = em.merge(usuarioListOldUsuario);
-                }
-            }
-            for (Usuario usuarioListNewUsuario : usuarioListNew) {
-                if (!usuarioListOld.contains(usuarioListNewUsuario)) {
-                    usuarioListNewUsuario.getProcessoList().add(processo);
-                    usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
-                }
-            }
-            for (Oficio oficioListOldOficio : oficioListOld) {
-                if (!oficioListNew.contains(oficioListOldOficio)) {
-                    oficioListOldOficio.getProcessoList().remove(processo);
-                    oficioListOldOficio = em.merge(oficioListOldOficio);
-                }
-            }
-            for (Oficio oficioListNewOficio : oficioListNew) {
-                if (!oficioListOld.contains(oficioListNewOficio)) {
-                    oficioListNewOficio.getProcessoList().add(processo);
-                    oficioListNewOficio = em.merge(oficioListNewOficio);
+            for (Possui possuiListOldPossui : possuiListOld) {
+                if (!possuiListNew.contains(possuiListOldPossui)) {
+                    possuiListOldPossui.setNumeroProcesso(null);
+                    possuiListOldPossui = em.merge(possuiListOldPossui);
                 }
             }
             for (Possui possuiListNewPossui : possuiListNew) {
                 if (!possuiListOld.contains(possuiListNewPossui)) {
-                    Processo oldProcessoOfPossuiListNewPossui = possuiListNewPossui.getProcesso();
-                    possuiListNewPossui.setProcesso(processo);
+                    Processo oldNumeroProcessoOfPossuiListNewPossui = possuiListNewPossui.getNumeroProcesso();
+                    possuiListNewPossui.setNumeroProcesso(processo);
                     possuiListNewPossui = em.merge(possuiListNewPossui);
-                    if (oldProcessoOfPossuiListNewPossui != null && !oldProcessoOfPossuiListNewPossui.equals(processo)) {
-                        oldProcessoOfPossuiListNewPossui.getPossuiList().remove(possuiListNewPossui);
-                        oldProcessoOfPossuiListNewPossui = em.merge(oldProcessoOfPossuiListNewPossui);
+                    if (oldNumeroProcessoOfPossuiListNewPossui != null && !oldNumeroProcessoOfPossuiListNewPossui.equals(processo)) {
+                        oldNumeroProcessoOfPossuiListNewPossui.getPossuiList().remove(possuiListNewPossui);
+                        oldNumeroProcessoOfPossuiListNewPossui = em.merge(oldNumeroProcessoOfPossuiListNewPossui);
                     }
                 }
             }
             for (Notafiscal notafiscalListOldNotafiscal : notafiscalListOld) {
                 if (!notafiscalListNew.contains(notafiscalListOldNotafiscal)) {
-                    notafiscalListOldNotafiscal.setNumeroProcesso(null);
+                    notafiscalListOldNotafiscal.setIdProcesso(null);
                     notafiscalListOldNotafiscal = em.merge(notafiscalListOldNotafiscal);
                 }
             }
             for (Notafiscal notafiscalListNewNotafiscal : notafiscalListNew) {
                 if (!notafiscalListOld.contains(notafiscalListNewNotafiscal)) {
-                    Processo oldNumeroProcessoOfNotafiscalListNewNotafiscal = notafiscalListNewNotafiscal.getNumeroProcesso();
-                    notafiscalListNewNotafiscal.setNumeroProcesso(processo);
+                    Processo oldIdProcessoOfNotafiscalListNewNotafiscal = notafiscalListNewNotafiscal.getIdProcesso();
+                    notafiscalListNewNotafiscal.setIdProcesso(processo);
                     notafiscalListNewNotafiscal = em.merge(notafiscalListNewNotafiscal);
-                    if (oldNumeroProcessoOfNotafiscalListNewNotafiscal != null && !oldNumeroProcessoOfNotafiscalListNewNotafiscal.equals(processo)) {
-                        oldNumeroProcessoOfNotafiscalListNewNotafiscal.getNotafiscalList().remove(notafiscalListNewNotafiscal);
-                        oldNumeroProcessoOfNotafiscalListNewNotafiscal = em.merge(oldNumeroProcessoOfNotafiscalListNewNotafiscal);
+                    if (oldIdProcessoOfNotafiscalListNewNotafiscal != null && !oldIdProcessoOfNotafiscalListNewNotafiscal.equals(processo)) {
+                        oldIdProcessoOfNotafiscalListNewNotafiscal.getNotafiscalList().remove(notafiscalListNewNotafiscal);
+                        oldIdProcessoOfNotafiscalListNewNotafiscal = em.merge(oldIdProcessoOfNotafiscalListNewNotafiscal);
+                    }
+                }
+            }
+            for (Cria criaListOldCria : criaListOld) {
+                if (!criaListNew.contains(criaListOldCria)) {
+                    criaListOldCria.setNumeroProcesso(null);
+                    criaListOldCria = em.merge(criaListOldCria);
+                }
+            }
+            for (Cria criaListNewCria : criaListNew) {
+                if (!criaListOld.contains(criaListNewCria)) {
+                    Processo oldNumeroProcessoOfCriaListNewCria = criaListNewCria.getNumeroProcesso();
+                    criaListNewCria.setNumeroProcesso(processo);
+                    criaListNewCria = em.merge(criaListNewCria);
+                    if (oldNumeroProcessoOfCriaListNewCria != null && !oldNumeroProcessoOfCriaListNewCria.equals(processo)) {
+                        oldNumeroProcessoOfCriaListNewCria.getCriaList().remove(criaListNewCria);
+                        oldNumeroProcessoOfCriaListNewCria = em.merge(oldNumeroProcessoOfCriaListNewCria);
+                    }
+                }
+            }
+            for (Possui1 possui1ListOldPossui1 : possui1ListOld) {
+                if (!possui1ListNew.contains(possui1ListOldPossui1)) {
+                    possui1ListOldPossui1.setNumeroProcesso(null);
+                    possui1ListOldPossui1 = em.merge(possui1ListOldPossui1);
+                }
+            }
+            for (Possui1 possui1ListNewPossui1 : possui1ListNew) {
+                if (!possui1ListOld.contains(possui1ListNewPossui1)) {
+                    Processo oldNumeroProcessoOfPossui1ListNewPossui1 = possui1ListNewPossui1.getNumeroProcesso();
+                    possui1ListNewPossui1.setNumeroProcesso(processo);
+                    possui1ListNewPossui1 = em.merge(possui1ListNewPossui1);
+                    if (oldNumeroProcessoOfPossui1ListNewPossui1 != null && !oldNumeroProcessoOfPossui1ListNewPossui1.equals(processo)) {
+                        oldNumeroProcessoOfPossui1ListNewPossui1.getPossui1List().remove(possui1ListNewPossui1);
+                        oldNumeroProcessoOfPossui1ListNewPossui1 = em.merge(oldNumeroProcessoOfPossui1ListNewPossui1);
                     }
                 }
             }
@@ -276,7 +284,7 @@ public class ProcessoJpaController implements Serializable {
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                Integer id = processo.getNumeroProcesso();
+                Integer id = processo.getIdProcesso();
                 if (findProcesso(id) == null) {
                     throw new NonexistentEntityException("The processo with id " + id + " no longer exists.");
                 }
@@ -289,7 +297,7 @@ public class ProcessoJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -297,20 +305,9 @@ public class ProcessoJpaController implements Serializable {
             Processo processo;
             try {
                 processo = em.getReference(Processo.class, id);
-                processo.getNumeroProcesso();
+                processo.getIdProcesso();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The processo with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<Possui> possuiListOrphanCheck = processo.getPossuiList();
-            for (Possui possuiListOrphanCheckPossui : possuiListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Processo (" + processo + ") cannot be destroyed since the Possui " + possuiListOrphanCheckPossui + " in its possuiList field has a non-nullable processo field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             Fornecedor idFornecedor = processo.getIdFornecedor();
             if (idFornecedor != null) {
@@ -322,20 +319,25 @@ public class ProcessoJpaController implements Serializable {
                 numeroOficio.getProcessoList().remove(processo);
                 numeroOficio = em.merge(numeroOficio);
             }
-            List<Usuario> usuarioList = processo.getUsuarioList();
-            for (Usuario usuarioListUsuario : usuarioList) {
-                usuarioListUsuario.getProcessoList().remove(processo);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-            }
-            List<Oficio> oficioList = processo.getOficioList();
-            for (Oficio oficioListOficio : oficioList) {
-                oficioListOficio.getProcessoList().remove(processo);
-                oficioListOficio = em.merge(oficioListOficio);
+            List<Possui> possuiList = processo.getPossuiList();
+            for (Possui possuiListPossui : possuiList) {
+                possuiListPossui.setNumeroProcesso(null);
+                possuiListPossui = em.merge(possuiListPossui);
             }
             List<Notafiscal> notafiscalList = processo.getNotafiscalList();
             for (Notafiscal notafiscalListNotafiscal : notafiscalList) {
-                notafiscalListNotafiscal.setNumeroProcesso(null);
+                notafiscalListNotafiscal.setIdProcesso(null);
                 notafiscalListNotafiscal = em.merge(notafiscalListNotafiscal);
+            }
+            List<Cria> criaList = processo.getCriaList();
+            for (Cria criaListCria : criaList) {
+                criaListCria.setNumeroProcesso(null);
+                criaListCria = em.merge(criaListCria);
+            }
+            List<Possui1> possui1List = processo.getPossui1List();
+            for (Possui1 possui1ListPossui1 : possui1List) {
+                possui1ListPossui1.setNumeroProcesso(null);
+                possui1ListPossui1 = em.merge(possui1ListPossui1);
             }
             em.remove(processo);
             em.getTransaction().commit();

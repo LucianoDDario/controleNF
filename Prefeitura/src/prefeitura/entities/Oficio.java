@@ -5,19 +5,22 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  *
@@ -27,6 +30,7 @@ import javax.persistence.Table;
 @Table(name = "oficio")
 @NamedQueries({
     @NamedQuery(name = "Oficio.findAll", query = "SELECT o FROM Oficio o"),
+    @NamedQuery(name = "Oficio.findByIdOficio", query = "SELECT o FROM Oficio o WHERE o.idOficio = :idOficio"),
     @NamedQuery(name = "Oficio.findByNumeroOficio", query = "SELECT o FROM Oficio o WHERE o.numeroOficio = :numeroOficio"),
     @NamedQuery(name = "Oficio.findByDescricao", query = "SELECT o FROM Oficio o WHERE o.descricao = :descricao"),
     @NamedQuery(name = "Oficio.findByDataOficio", query = "SELECT o FROM Oficio o WHERE o.dataOficio = :dataOficio")})
@@ -34,43 +38,50 @@ public class Oficio implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
+    @Column(name = "IdOficio")
+    private Integer idOficio;
     @Column(name = "NumeroOficio")
     private Integer numeroOficio;
     @Column(name = "Descricao")
     private String descricao;
     @Column(name = "DataOficio")
-    private String dataOficio;
-    @ManyToMany(mappedBy = "oficioList")
-    private List<Processo> processoList;
-    @JoinTable(name = "envia1", joinColumns = {
-        @JoinColumn(name = "NumeroOficio", referencedColumnName = "NumeroOficio")}, inverseJoinColumns = {
-        @JoinColumn(name = "IdSecretaria", referencedColumnName = "IdSecretaria")})
-    @ManyToMany
-    private List<Secretaria> secretariaList;
-    @JoinTable(name = "recebe", joinColumns = {
-        @JoinColumn(name = "NumeroOficio", referencedColumnName = "NumeroOficio")}, inverseJoinColumns = {
-        @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")})
-    @ManyToMany
-    private List<Usuario> usuarioList;
-    @OneToMany(mappedBy = "numeroOficio")
-    private List<Processo> processoList1;
+    @Temporal(TemporalType.DATE)
+    private Date dataOficio;
     @JoinColumn(name = "IdSecretaria", referencedColumnName = "IdSecretaria")
     @ManyToOne
     private Secretaria idSecretaria;
+    @OneToMany(mappedBy = "numeroOficio")
+    private List<Possui1> possui1List;
+    @OneToMany(mappedBy = "numeroOficio")
+    private List<Envia1> envia1List;
+    @OneToMany(mappedBy = "numeroOficio")
+    private List<Processo> processoList;
+    @OneToMany(mappedBy = "numeroOficio")
+    private List<Recebe> recebeList;
 
     public Oficio() {
     }
 
-    public Oficio(Integer numeroOficio, String descricao, String dataOficio, Secretaria idSecretaria) {
+    public Oficio(Integer idOficio, Integer numeroOficio, String descricao, Date dataOficio, Secretaria idSecretaria) {
+        this.idOficio = idOficio;
         this.numeroOficio = numeroOficio;
         this.descricao = descricao;
         this.dataOficio = dataOficio;
         this.idSecretaria = idSecretaria;
     }
+    
+    public Oficio(Integer idOficio) {
+        this.idOficio = idOficio;
+    }
 
-    public Oficio(Integer numeroOficio) {
-        this.numeroOficio = numeroOficio;
+    public Integer getIdOficio() {
+        return idOficio;
+    }
+
+    public void setIdOficio(Integer idOficio) {
+        this.idOficio = idOficio;
     }
 
     public Integer getNumeroOficio() {
@@ -89,44 +100,12 @@ public class Oficio implements Serializable {
         this.descricao = descricao;
     }
 
-    public String getDataOficio() {
+    public Date getDataOficio() {
         return dataOficio;
     }
 
-    public void setDataOficio(String dataOficio) {
+    public void setDataOficio(Date dataOficio) {
         this.dataOficio = dataOficio;
-    }
-
-    public List<Processo> getProcessoList() {
-        return processoList;
-    }
-
-    public void setProcessoList(List<Processo> processoList) {
-        this.processoList = processoList;
-    }
-
-    public List<Secretaria> getSecretariaList() {
-        return secretariaList;
-    }
-
-    public void setSecretariaList(List<Secretaria> secretariaList) {
-        this.secretariaList = secretariaList;
-    }
-
-    public List<Usuario> getUsuarioList() {
-        return usuarioList;
-    }
-
-    public void setUsuarioList(List<Usuario> usuarioList) {
-        this.usuarioList = usuarioList;
-    }
-
-    public List<Processo> getProcessoList1() {
-        return processoList1;
-    }
-
-    public void setProcessoList1(List<Processo> processoList1) {
-        this.processoList1 = processoList1;
     }
 
     public Secretaria getIdSecretaria() {
@@ -137,10 +116,42 @@ public class Oficio implements Serializable {
         this.idSecretaria = idSecretaria;
     }
 
+    public List<Possui1> getPossui1List() {
+        return possui1List;
+    }
+
+    public void setPossui1List(List<Possui1> possui1List) {
+        this.possui1List = possui1List;
+    }
+
+    public List<Envia1> getEnvia1List() {
+        return envia1List;
+    }
+
+    public void setEnvia1List(List<Envia1> envia1List) {
+        this.envia1List = envia1List;
+    }
+
+    public List<Processo> getProcessoList() {
+        return processoList;
+    }
+
+    public void setProcessoList(List<Processo> processoList) {
+        this.processoList = processoList;
+    }
+
+    public List<Recebe> getRecebeList() {
+        return recebeList;
+    }
+
+    public void setRecebeList(List<Recebe> recebeList) {
+        this.recebeList = recebeList;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (numeroOficio != null ? numeroOficio.hashCode() : 0);
+        hash += (idOficio != null ? idOficio.hashCode() : 0);
         return hash;
     }
 
@@ -151,7 +162,7 @@ public class Oficio implements Serializable {
             return false;
         }
         Oficio other = (Oficio) object;
-        if ((this.numeroOficio == null && other.numeroOficio != null) || (this.numeroOficio != null && !this.numeroOficio.equals(other.numeroOficio))) {
+        if ((this.idOficio == null && other.idOficio != null) || (this.idOficio != null && !this.idOficio.equals(other.idOficio))) {
             return false;
         }
         return true;
@@ -159,7 +170,7 @@ public class Oficio implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Oficio[ numeroOficio=" + numeroOficio + " ]";
+        return "prefeitura.entities.Oficio[ idOficio=" + idOficio + " ]";
     }
     
 }

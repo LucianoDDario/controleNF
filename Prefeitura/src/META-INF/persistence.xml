@@ -2,15 +2,21 @@
 <persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence           http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
   <persistence-unit name="PrefeituraFuncionandoPU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <class>prefeitura.entities.Possui</class>
-    <class>prefeitura.entities.Fornecedor</class>
-    <class>prefeitura.entities.Logsistema</class>
-    <class>prefeitura.entities.Protocolo</class>
-    <class>prefeitura.entities.Usuario</class>
-    <class>prefeitura.entities.Secretaria</class>
-    <class>prefeitura.entities.Processo</class>
+    <class>prefeitura.entities.Monitora</class>
     <class>prefeitura.entities.Notafiscal</class>
+    <class>prefeitura.entities.Possui1</class>
+    <class>prefeitura.entities.Logsistema</class>
+    <class>prefeitura.entities.Possui</class>
     <class>prefeitura.entities.Oficio</class>
+    <class>prefeitura.entities.Secretaria</class>
+    <class>prefeitura.entities.Envia</class>
+    <class>prefeitura.entities.Envia1</class>
+    <class>prefeitura.entities.Cria</class>
+    <class>prefeitura.entities.Usuario</class>
+    <class>prefeitura.entities.Fornecedor</class>
+    <class>prefeitura.entities.Protocolo</class>
+    <class>prefeitura.entities.Processo</class>
+    <class>prefeitura.entities.Recebe</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/controlenf?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

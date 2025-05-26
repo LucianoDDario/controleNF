@@ -5,20 +5,22 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  *
@@ -28,6 +30,7 @@ import javax.persistence.Table;
 @Table(name = "processo")
 @NamedQueries({
     @NamedQuery(name = "Processo.findAll", query = "SELECT p FROM Processo p"),
+    @NamedQuery(name = "Processo.findByIdProcesso", query = "SELECT p FROM Processo p WHERE p.idProcesso = :idProcesso"),
     @NamedQuery(name = "Processo.findByNumeroProcesso", query = "SELECT p FROM Processo p WHERE p.numeroProcesso = :numeroProcesso"),
     @NamedQuery(name = "Processo.findByTipoProcesso", query = "SELECT p FROM Processo p WHERE p.tipoProcesso = :tipoProcesso"),
     @NamedQuery(name = "Processo.findByDataSaidaCompras", query = "SELECT p FROM Processo p WHERE p.dataSaidaCompras = :dataSaidaCompras")})
@@ -35,39 +38,53 @@ public class Processo implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
+    @Column(name = "IdProcesso")
+    private Integer idProcesso;
     @Column(name = "NumeroProcesso")
     private Integer numeroProcesso;
     @Column(name = "TipoProcesso")
     private String tipoProcesso;
     @Column(name = "DataSaidaCompras")
-    private String dataSaidaCompras;
-    @JoinTable(name = "cria", joinColumns = {
-        @JoinColumn(name = "NumeroProcesso", referencedColumnName = "NumeroProcesso")}, inverseJoinColumns = {
-        @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")})
-    @ManyToMany
-    private List<Usuario> usuarioList;
-    @JoinTable(name = "possui1", joinColumns = {
-        @JoinColumn(name = "NumeroProcesso", referencedColumnName = "NumeroProcesso")}, inverseJoinColumns = {
-        @JoinColumn(name = "NumeroOficio", referencedColumnName = "NumeroOficio")})
-    @ManyToMany
-    private List<Oficio> oficioList;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "processo")
+    @Temporal(TemporalType.DATE)
+    private Date dataSaidaCompras;
+    @OneToMany(mappedBy = "numeroProcesso")
     private List<Possui> possuiList;
+    @OneToMany(mappedBy = "idProcesso")
+    private List<Notafiscal> notafiscalList;
+    @OneToMany(mappedBy = "numeroProcesso")
+    private List<Cria> criaList;
+    @OneToMany(mappedBy = "numeroProcesso")
+    private List<Possui1> possui1List;
     @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
     @ManyToOne
     private Fornecedor idFornecedor;
     @JoinColumn(name = "NumeroOficio", referencedColumnName = "NumeroOficio")
     @ManyToOne
     private Oficio numeroOficio;
-    @OneToMany(mappedBy = "numeroProcesso")
-    private List<Notafiscal> notafiscalList;
 
     public Processo() {
     }
 
-    public Processo(Integer numeroProcesso) {
+    public Processo(Integer idProcesso, Integer numeroProcesso, String tipoProcesso, Date dataSaidaCompras, Fornecedor idFornecedor) {
+        this.idProcesso = idProcesso;
         this.numeroProcesso = numeroProcesso;
+        this.tipoProcesso = tipoProcesso;
+        this.dataSaidaCompras = dataSaidaCompras;
+        this.idFornecedor = idFornecedor;
+    }
+
+    public Processo(Integer idProcesso) {
+        this.idProcesso = idProcesso;
+    }
+
+    public Integer getIdProcesso() {
+        return idProcesso;
+    }
+
+    public void setIdProcesso(Integer idProcesso) {
+        this.idProcesso = idProcesso;
     }
 
     public Integer getNumeroProcesso() {
@@ -86,28 +103,12 @@ public class Processo implements Serializable {
         this.tipoProcesso = tipoProcesso;
     }
 
-    public String getDataSaidaCompras() {
+    public Date getDataSaidaCompras() {
         return dataSaidaCompras;
     }
 
-    public void setDataSaidaCompras(String dataSaidaCompras) {
+    public void setDataSaidaCompras(Date dataSaidaCompras) {
         this.dataSaidaCompras = dataSaidaCompras;
-    }
-
-    public List<Usuario> getUsuarioList() {
-        return usuarioList;
-    }
-
-    public void setUsuarioList(List<Usuario> usuarioList) {
-        this.usuarioList = usuarioList;
-    }
-
-    public List<Oficio> getOficioList() {
-        return oficioList;
-    }
-
-    public void setOficioList(List<Oficio> oficioList) {
-        this.oficioList = oficioList;
     }
 
     public List<Possui> getPossuiList() {
@@ -116,6 +117,30 @@ public class Processo implements Serializable {
 
     public void setPossuiList(List<Possui> possuiList) {
         this.possuiList = possuiList;
+    }
+
+    public List<Notafiscal> getNotafiscalList() {
+        return notafiscalList;
+    }
+
+    public void setNotafiscalList(List<Notafiscal> notafiscalList) {
+        this.notafiscalList = notafiscalList;
+    }
+
+    public List<Cria> getCriaList() {
+        return criaList;
+    }
+
+    public void setCriaList(List<Cria> criaList) {
+        this.criaList = criaList;
+    }
+
+    public List<Possui1> getPossui1List() {
+        return possui1List;
+    }
+
+    public void setPossui1List(List<Possui1> possui1List) {
+        this.possui1List = possui1List;
     }
 
     public Fornecedor getIdFornecedor() {
@@ -134,18 +159,10 @@ public class Processo implements Serializable {
         this.numeroOficio = numeroOficio;
     }
 
-    public List<Notafiscal> getNotafiscalList() {
-        return notafiscalList;
-    }
-
-    public void setNotafiscalList(List<Notafiscal> notafiscalList) {
-        this.notafiscalList = notafiscalList;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (numeroProcesso != null ? numeroProcesso.hashCode() : 0);
+        hash += (idProcesso != null ? idProcesso.hashCode() : 0);
         return hash;
     }
 
@@ -156,7 +173,7 @@ public class Processo implements Serializable {
             return false;
         }
         Processo other = (Processo) object;
-        if ((this.numeroProcesso == null && other.numeroProcesso != null) || (this.numeroProcesso != null && !this.numeroProcesso.equals(other.numeroProcesso))) {
+        if ((this.idProcesso == null && other.idProcesso != null) || (this.idProcesso != null && !this.idProcesso.equals(other.idProcesso))) {
             return false;
         }
         return true;
@@ -164,7 +181,7 @@ public class Processo implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Processo[ numeroProcesso=" + numeroProcesso + " ]";
+        return "prefeitura.entities.Processo[ idProcesso=" + idProcesso + " ]";
     }
     
 }

@@ -9,14 +9,15 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import prefeitura.entities.Logsistema;
+import prefeitura.entities.Monitora;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
-import prefeitura.entities.Processo;
-import prefeitura.entities.Oficio;
+import prefeitura.entities.Cria;
+import prefeitura.entities.Logsistema;
+import prefeitura.entities.Recebe;
 import prefeitura.entities.Usuario;
 
 /**
@@ -35,66 +36,81 @@ public class UsuarioJpaController implements Serializable {
     }
 
     public void create(Usuario usuario) {
+        if (usuario.getMonitoraList() == null) {
+            usuario.setMonitoraList(new ArrayList<Monitora>());
+        }
+        if (usuario.getCriaList() == null) {
+            usuario.setCriaList(new ArrayList<Cria>());
+        }
         if (usuario.getLogsistemaList() == null) {
             usuario.setLogsistemaList(new ArrayList<Logsistema>());
         }
-        if (usuario.getProcessoList() == null) {
-            usuario.setProcessoList(new ArrayList<Processo>());
-        }
-        if (usuario.getOficioList() == null) {
-            usuario.setOficioList(new ArrayList<Oficio>());
-        }
-        if (usuario.getLogsistemaList1() == null) {
-            usuario.setLogsistemaList1(new ArrayList<Logsistema>());
+        if (usuario.getRecebeList() == null) {
+            usuario.setRecebeList(new ArrayList<Recebe>());
         }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            List<Monitora> attachedMonitoraList = new ArrayList<Monitora>();
+            for (Monitora monitoraListMonitoraToAttach : usuario.getMonitoraList()) {
+                monitoraListMonitoraToAttach = em.getReference(monitoraListMonitoraToAttach.getClass(), monitoraListMonitoraToAttach.getIdMonitora());
+                attachedMonitoraList.add(monitoraListMonitoraToAttach);
+            }
+            usuario.setMonitoraList(attachedMonitoraList);
+            List<Cria> attachedCriaList = new ArrayList<Cria>();
+            for (Cria criaListCriaToAttach : usuario.getCriaList()) {
+                criaListCriaToAttach = em.getReference(criaListCriaToAttach.getClass(), criaListCriaToAttach.getIdCria());
+                attachedCriaList.add(criaListCriaToAttach);
+            }
+            usuario.setCriaList(attachedCriaList);
             List<Logsistema> attachedLogsistemaList = new ArrayList<Logsistema>();
             for (Logsistema logsistemaListLogsistemaToAttach : usuario.getLogsistemaList()) {
                 logsistemaListLogsistemaToAttach = em.getReference(logsistemaListLogsistemaToAttach.getClass(), logsistemaListLogsistemaToAttach.getIdLog());
                 attachedLogsistemaList.add(logsistemaListLogsistemaToAttach);
             }
             usuario.setLogsistemaList(attachedLogsistemaList);
-            List<Processo> attachedProcessoList = new ArrayList<Processo>();
-            for (Processo processoListProcessoToAttach : usuario.getProcessoList()) {
-                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getNumeroProcesso());
-                attachedProcessoList.add(processoListProcessoToAttach);
+            List<Recebe> attachedRecebeList = new ArrayList<Recebe>();
+            for (Recebe recebeListRecebeToAttach : usuario.getRecebeList()) {
+                recebeListRecebeToAttach = em.getReference(recebeListRecebeToAttach.getClass(), recebeListRecebeToAttach.getIdRecebe());
+                attachedRecebeList.add(recebeListRecebeToAttach);
             }
-            usuario.setProcessoList(attachedProcessoList);
-            List<Oficio> attachedOficioList = new ArrayList<Oficio>();
-            for (Oficio oficioListOficioToAttach : usuario.getOficioList()) {
-                oficioListOficioToAttach = em.getReference(oficioListOficioToAttach.getClass(), oficioListOficioToAttach.getNumeroOficio());
-                attachedOficioList.add(oficioListOficioToAttach);
-            }
-            usuario.setOficioList(attachedOficioList);
-            List<Logsistema> attachedLogsistemaList1 = new ArrayList<Logsistema>();
-            for (Logsistema logsistemaList1LogsistemaToAttach : usuario.getLogsistemaList1()) {
-                logsistemaList1LogsistemaToAttach = em.getReference(logsistemaList1LogsistemaToAttach.getClass(), logsistemaList1LogsistemaToAttach.getIdLog());
-                attachedLogsistemaList1.add(logsistemaList1LogsistemaToAttach);
-            }
-            usuario.setLogsistemaList1(attachedLogsistemaList1);
+            usuario.setRecebeList(attachedRecebeList);
             em.persist(usuario);
+            for (Monitora monitoraListMonitora : usuario.getMonitoraList()) {
+                Usuario oldIdUsuarioOfMonitoraListMonitora = monitoraListMonitora.getIdUsuario();
+                monitoraListMonitora.setIdUsuario(usuario);
+                monitoraListMonitora = em.merge(monitoraListMonitora);
+                if (oldIdUsuarioOfMonitoraListMonitora != null) {
+                    oldIdUsuarioOfMonitoraListMonitora.getMonitoraList().remove(monitoraListMonitora);
+                    oldIdUsuarioOfMonitoraListMonitora = em.merge(oldIdUsuarioOfMonitoraListMonitora);
+                }
+            }
+            for (Cria criaListCria : usuario.getCriaList()) {
+                Usuario oldIdUsuarioOfCriaListCria = criaListCria.getIdUsuario();
+                criaListCria.setIdUsuario(usuario);
+                criaListCria = em.merge(criaListCria);
+                if (oldIdUsuarioOfCriaListCria != null) {
+                    oldIdUsuarioOfCriaListCria.getCriaList().remove(criaListCria);
+                    oldIdUsuarioOfCriaListCria = em.merge(oldIdUsuarioOfCriaListCria);
+                }
+            }
             for (Logsistema logsistemaListLogsistema : usuario.getLogsistemaList()) {
-                logsistemaListLogsistema.getUsuarioList().add(usuario);
+                Usuario oldIdUsuarioOfLogsistemaListLogsistema = logsistemaListLogsistema.getIdUsuario();
+                logsistemaListLogsistema.setIdUsuario(usuario);
                 logsistemaListLogsistema = em.merge(logsistemaListLogsistema);
+                if (oldIdUsuarioOfLogsistemaListLogsistema != null) {
+                    oldIdUsuarioOfLogsistemaListLogsistema.getLogsistemaList().remove(logsistemaListLogsistema);
+                    oldIdUsuarioOfLogsistemaListLogsistema = em.merge(oldIdUsuarioOfLogsistemaListLogsistema);
+                }
             }
-            for (Processo processoListProcesso : usuario.getProcessoList()) {
-                processoListProcesso.getUsuarioList().add(usuario);
-                processoListProcesso = em.merge(processoListProcesso);
-            }
-            for (Oficio oficioListOficio : usuario.getOficioList()) {
-                oficioListOficio.getUsuarioList().add(usuario);
-                oficioListOficio = em.merge(oficioListOficio);
-            }
-            for (Logsistema logsistemaList1Logsistema : usuario.getLogsistemaList1()) {
-                Usuario oldIdUsuarioOfLogsistemaList1Logsistema = logsistemaList1Logsistema.getIdUsuario();
-                logsistemaList1Logsistema.setIdUsuario(usuario);
-                logsistemaList1Logsistema = em.merge(logsistemaList1Logsistema);
-                if (oldIdUsuarioOfLogsistemaList1Logsistema != null) {
-                    oldIdUsuarioOfLogsistemaList1Logsistema.getLogsistemaList1().remove(logsistemaList1Logsistema);
-                    oldIdUsuarioOfLogsistemaList1Logsistema = em.merge(oldIdUsuarioOfLogsistemaList1Logsistema);
+            for (Recebe recebeListRecebe : usuario.getRecebeList()) {
+                Usuario oldIdUsuarioOfRecebeListRecebe = recebeListRecebe.getIdUsuario();
+                recebeListRecebe.setIdUsuario(usuario);
+                recebeListRecebe = em.merge(recebeListRecebe);
+                if (oldIdUsuarioOfRecebeListRecebe != null) {
+                    oldIdUsuarioOfRecebeListRecebe.getRecebeList().remove(recebeListRecebe);
+                    oldIdUsuarioOfRecebeListRecebe = em.merge(oldIdUsuarioOfRecebeListRecebe);
                 }
             }
             em.getTransaction().commit();
@@ -111,14 +127,28 @@ public class UsuarioJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Usuario persistentUsuario = em.find(Usuario.class, usuario.getIdUsuario());
+            List<Monitora> monitoraListOld = persistentUsuario.getMonitoraList();
+            List<Monitora> monitoraListNew = usuario.getMonitoraList();
+            List<Cria> criaListOld = persistentUsuario.getCriaList();
+            List<Cria> criaListNew = usuario.getCriaList();
             List<Logsistema> logsistemaListOld = persistentUsuario.getLogsistemaList();
             List<Logsistema> logsistemaListNew = usuario.getLogsistemaList();
-            List<Processo> processoListOld = persistentUsuario.getProcessoList();
-            List<Processo> processoListNew = usuario.getProcessoList();
-            List<Oficio> oficioListOld = persistentUsuario.getOficioList();
-            List<Oficio> oficioListNew = usuario.getOficioList();
-            List<Logsistema> logsistemaList1Old = persistentUsuario.getLogsistemaList1();
-            List<Logsistema> logsistemaList1New = usuario.getLogsistemaList1();
+            List<Recebe> recebeListOld = persistentUsuario.getRecebeList();
+            List<Recebe> recebeListNew = usuario.getRecebeList();
+            List<Monitora> attachedMonitoraListNew = new ArrayList<Monitora>();
+            for (Monitora monitoraListNewMonitoraToAttach : monitoraListNew) {
+                monitoraListNewMonitoraToAttach = em.getReference(monitoraListNewMonitoraToAttach.getClass(), monitoraListNewMonitoraToAttach.getIdMonitora());
+                attachedMonitoraListNew.add(monitoraListNewMonitoraToAttach);
+            }
+            monitoraListNew = attachedMonitoraListNew;
+            usuario.setMonitoraList(monitoraListNew);
+            List<Cria> attachedCriaListNew = new ArrayList<Cria>();
+            for (Cria criaListNewCriaToAttach : criaListNew) {
+                criaListNewCriaToAttach = em.getReference(criaListNewCriaToAttach.getClass(), criaListNewCriaToAttach.getIdCria());
+                attachedCriaListNew.add(criaListNewCriaToAttach);
+            }
+            criaListNew = attachedCriaListNew;
+            usuario.setCriaList(criaListNew);
             List<Logsistema> attachedLogsistemaListNew = new ArrayList<Logsistema>();
             for (Logsistema logsistemaListNewLogsistemaToAttach : logsistemaListNew) {
                 logsistemaListNewLogsistemaToAttach = em.getReference(logsistemaListNewLogsistemaToAttach.getClass(), logsistemaListNewLogsistemaToAttach.getIdLog());
@@ -126,78 +156,79 @@ public class UsuarioJpaController implements Serializable {
             }
             logsistemaListNew = attachedLogsistemaListNew;
             usuario.setLogsistemaList(logsistemaListNew);
-            List<Processo> attachedProcessoListNew = new ArrayList<Processo>();
-            for (Processo processoListNewProcessoToAttach : processoListNew) {
-                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getNumeroProcesso());
-                attachedProcessoListNew.add(processoListNewProcessoToAttach);
+            List<Recebe> attachedRecebeListNew = new ArrayList<Recebe>();
+            for (Recebe recebeListNewRecebeToAttach : recebeListNew) {
+                recebeListNewRecebeToAttach = em.getReference(recebeListNewRecebeToAttach.getClass(), recebeListNewRecebeToAttach.getIdRecebe());
+                attachedRecebeListNew.add(recebeListNewRecebeToAttach);
             }
-            processoListNew = attachedProcessoListNew;
-            usuario.setProcessoList(processoListNew);
-            List<Oficio> attachedOficioListNew = new ArrayList<Oficio>();
-            for (Oficio oficioListNewOficioToAttach : oficioListNew) {
-                oficioListNewOficioToAttach = em.getReference(oficioListNewOficioToAttach.getClass(), oficioListNewOficioToAttach.getNumeroOficio());
-                attachedOficioListNew.add(oficioListNewOficioToAttach);
-            }
-            oficioListNew = attachedOficioListNew;
-            usuario.setOficioList(oficioListNew);
-            List<Logsistema> attachedLogsistemaList1New = new ArrayList<Logsistema>();
-            for (Logsistema logsistemaList1NewLogsistemaToAttach : logsistemaList1New) {
-                logsistemaList1NewLogsistemaToAttach = em.getReference(logsistemaList1NewLogsistemaToAttach.getClass(), logsistemaList1NewLogsistemaToAttach.getIdLog());
-                attachedLogsistemaList1New.add(logsistemaList1NewLogsistemaToAttach);
-            }
-            logsistemaList1New = attachedLogsistemaList1New;
-            usuario.setLogsistemaList1(logsistemaList1New);
+            recebeListNew = attachedRecebeListNew;
+            usuario.setRecebeList(recebeListNew);
             usuario = em.merge(usuario);
+            for (Monitora monitoraListOldMonitora : monitoraListOld) {
+                if (!monitoraListNew.contains(monitoraListOldMonitora)) {
+                    monitoraListOldMonitora.setIdUsuario(null);
+                    monitoraListOldMonitora = em.merge(monitoraListOldMonitora);
+                }
+            }
+            for (Monitora monitoraListNewMonitora : monitoraListNew) {
+                if (!monitoraListOld.contains(monitoraListNewMonitora)) {
+                    Usuario oldIdUsuarioOfMonitoraListNewMonitora = monitoraListNewMonitora.getIdUsuario();
+                    monitoraListNewMonitora.setIdUsuario(usuario);
+                    monitoraListNewMonitora = em.merge(monitoraListNewMonitora);
+                    if (oldIdUsuarioOfMonitoraListNewMonitora != null && !oldIdUsuarioOfMonitoraListNewMonitora.equals(usuario)) {
+                        oldIdUsuarioOfMonitoraListNewMonitora.getMonitoraList().remove(monitoraListNewMonitora);
+                        oldIdUsuarioOfMonitoraListNewMonitora = em.merge(oldIdUsuarioOfMonitoraListNewMonitora);
+                    }
+                }
+            }
+            for (Cria criaListOldCria : criaListOld) {
+                if (!criaListNew.contains(criaListOldCria)) {
+                    criaListOldCria.setIdUsuario(null);
+                    criaListOldCria = em.merge(criaListOldCria);
+                }
+            }
+            for (Cria criaListNewCria : criaListNew) {
+                if (!criaListOld.contains(criaListNewCria)) {
+                    Usuario oldIdUsuarioOfCriaListNewCria = criaListNewCria.getIdUsuario();
+                    criaListNewCria.setIdUsuario(usuario);
+                    criaListNewCria = em.merge(criaListNewCria);
+                    if (oldIdUsuarioOfCriaListNewCria != null && !oldIdUsuarioOfCriaListNewCria.equals(usuario)) {
+                        oldIdUsuarioOfCriaListNewCria.getCriaList().remove(criaListNewCria);
+                        oldIdUsuarioOfCriaListNewCria = em.merge(oldIdUsuarioOfCriaListNewCria);
+                    }
+                }
+            }
             for (Logsistema logsistemaListOldLogsistema : logsistemaListOld) {
                 if (!logsistemaListNew.contains(logsistemaListOldLogsistema)) {
-                    logsistemaListOldLogsistema.getUsuarioList().remove(usuario);
+                    logsistemaListOldLogsistema.setIdUsuario(null);
                     logsistemaListOldLogsistema = em.merge(logsistemaListOldLogsistema);
                 }
             }
             for (Logsistema logsistemaListNewLogsistema : logsistemaListNew) {
                 if (!logsistemaListOld.contains(logsistemaListNewLogsistema)) {
-                    logsistemaListNewLogsistema.getUsuarioList().add(usuario);
+                    Usuario oldIdUsuarioOfLogsistemaListNewLogsistema = logsistemaListNewLogsistema.getIdUsuario();
+                    logsistemaListNewLogsistema.setIdUsuario(usuario);
                     logsistemaListNewLogsistema = em.merge(logsistemaListNewLogsistema);
+                    if (oldIdUsuarioOfLogsistemaListNewLogsistema != null && !oldIdUsuarioOfLogsistemaListNewLogsistema.equals(usuario)) {
+                        oldIdUsuarioOfLogsistemaListNewLogsistema.getLogsistemaList().remove(logsistemaListNewLogsistema);
+                        oldIdUsuarioOfLogsistemaListNewLogsistema = em.merge(oldIdUsuarioOfLogsistemaListNewLogsistema);
+                    }
                 }
             }
-            for (Processo processoListOldProcesso : processoListOld) {
-                if (!processoListNew.contains(processoListOldProcesso)) {
-                    processoListOldProcesso.getUsuarioList().remove(usuario);
-                    processoListOldProcesso = em.merge(processoListOldProcesso);
+            for (Recebe recebeListOldRecebe : recebeListOld) {
+                if (!recebeListNew.contains(recebeListOldRecebe)) {
+                    recebeListOldRecebe.setIdUsuario(null);
+                    recebeListOldRecebe = em.merge(recebeListOldRecebe);
                 }
             }
-            for (Processo processoListNewProcesso : processoListNew) {
-                if (!processoListOld.contains(processoListNewProcesso)) {
-                    processoListNewProcesso.getUsuarioList().add(usuario);
-                    processoListNewProcesso = em.merge(processoListNewProcesso);
-                }
-            }
-            for (Oficio oficioListOldOficio : oficioListOld) {
-                if (!oficioListNew.contains(oficioListOldOficio)) {
-                    oficioListOldOficio.getUsuarioList().remove(usuario);
-                    oficioListOldOficio = em.merge(oficioListOldOficio);
-                }
-            }
-            for (Oficio oficioListNewOficio : oficioListNew) {
-                if (!oficioListOld.contains(oficioListNewOficio)) {
-                    oficioListNewOficio.getUsuarioList().add(usuario);
-                    oficioListNewOficio = em.merge(oficioListNewOficio);
-                }
-            }
-            for (Logsistema logsistemaList1OldLogsistema : logsistemaList1Old) {
-                if (!logsistemaList1New.contains(logsistemaList1OldLogsistema)) {
-                    logsistemaList1OldLogsistema.setIdUsuario(null);
-                    logsistemaList1OldLogsistema = em.merge(logsistemaList1OldLogsistema);
-                }
-            }
-            for (Logsistema logsistemaList1NewLogsistema : logsistemaList1New) {
-                if (!logsistemaList1Old.contains(logsistemaList1NewLogsistema)) {
-                    Usuario oldIdUsuarioOfLogsistemaList1NewLogsistema = logsistemaList1NewLogsistema.getIdUsuario();
-                    logsistemaList1NewLogsistema.setIdUsuario(usuario);
-                    logsistemaList1NewLogsistema = em.merge(logsistemaList1NewLogsistema);
-                    if (oldIdUsuarioOfLogsistemaList1NewLogsistema != null && !oldIdUsuarioOfLogsistemaList1NewLogsistema.equals(usuario)) {
-                        oldIdUsuarioOfLogsistemaList1NewLogsistema.getLogsistemaList1().remove(logsistemaList1NewLogsistema);
-                        oldIdUsuarioOfLogsistemaList1NewLogsistema = em.merge(oldIdUsuarioOfLogsistemaList1NewLogsistema);
+            for (Recebe recebeListNewRecebe : recebeListNew) {
+                if (!recebeListOld.contains(recebeListNewRecebe)) {
+                    Usuario oldIdUsuarioOfRecebeListNewRecebe = recebeListNewRecebe.getIdUsuario();
+                    recebeListNewRecebe.setIdUsuario(usuario);
+                    recebeListNewRecebe = em.merge(recebeListNewRecebe);
+                    if (oldIdUsuarioOfRecebeListNewRecebe != null && !oldIdUsuarioOfRecebeListNewRecebe.equals(usuario)) {
+                        oldIdUsuarioOfRecebeListNewRecebe.getRecebeList().remove(recebeListNewRecebe);
+                        oldIdUsuarioOfRecebeListNewRecebe = em.merge(oldIdUsuarioOfRecebeListNewRecebe);
                     }
                 }
             }
@@ -230,25 +261,25 @@ public class UsuarioJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The usuario with id " + id + " no longer exists.", enfe);
             }
+            List<Monitora> monitoraList = usuario.getMonitoraList();
+            for (Monitora monitoraListMonitora : monitoraList) {
+                monitoraListMonitora.setIdUsuario(null);
+                monitoraListMonitora = em.merge(monitoraListMonitora);
+            }
+            List<Cria> criaList = usuario.getCriaList();
+            for (Cria criaListCria : criaList) {
+                criaListCria.setIdUsuario(null);
+                criaListCria = em.merge(criaListCria);
+            }
             List<Logsistema> logsistemaList = usuario.getLogsistemaList();
             for (Logsistema logsistemaListLogsistema : logsistemaList) {
-                logsistemaListLogsistema.getUsuarioList().remove(usuario);
+                logsistemaListLogsistema.setIdUsuario(null);
                 logsistemaListLogsistema = em.merge(logsistemaListLogsistema);
             }
-            List<Processo> processoList = usuario.getProcessoList();
-            for (Processo processoListProcesso : processoList) {
-                processoListProcesso.getUsuarioList().remove(usuario);
-                processoListProcesso = em.merge(processoListProcesso);
-            }
-            List<Oficio> oficioList = usuario.getOficioList();
-            for (Oficio oficioListOficio : oficioList) {
-                oficioListOficio.getUsuarioList().remove(usuario);
-                oficioListOficio = em.merge(oficioListOficio);
-            }
-            List<Logsistema> logsistemaList1 = usuario.getLogsistemaList1();
-            for (Logsistema logsistemaList1Logsistema : logsistemaList1) {
-                logsistemaList1Logsistema.setIdUsuario(null);
-                logsistemaList1Logsistema = em.merge(logsistemaList1Logsistema);
+            List<Recebe> recebeList = usuario.getRecebeList();
+            for (Recebe recebeListRecebe : recebeList) {
+                recebeListRecebe.setIdUsuario(null);
+                recebeListRecebe = em.merge(recebeListRecebe);
             }
             em.remove(usuario);
             em.getTransaction().commit();

@@ -9,13 +9,14 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import prefeitura.entities.Notafiscal;
+import prefeitura.entities.Envia;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
 import prefeitura.entities.Fornecedor;
+import prefeitura.entities.Notafiscal;
 import prefeitura.entities.Processo;
 
 /**
@@ -34,41 +35,55 @@ public class FornecedorJpaController implements Serializable {
     }
 
     public void create(Fornecedor fornecedor) {
+        if (fornecedor.getEnviaList() == null) {
+            fornecedor.setEnviaList(new ArrayList<Envia>());
+        }
         if (fornecedor.getNotafiscalList() == null) {
             fornecedor.setNotafiscalList(new ArrayList<Notafiscal>());
         }
         if (fornecedor.getProcessoList() == null) {
             fornecedor.setProcessoList(new ArrayList<Processo>());
         }
-        if (fornecedor.getNotafiscalList1() == null) {
-            fornecedor.setNotafiscalList1(new ArrayList<Notafiscal>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            List<Envia> attachedEnviaList = new ArrayList<Envia>();
+            for (Envia enviaListEnviaToAttach : fornecedor.getEnviaList()) {
+                enviaListEnviaToAttach = em.getReference(enviaListEnviaToAttach.getClass(), enviaListEnviaToAttach.getIdEnvia());
+                attachedEnviaList.add(enviaListEnviaToAttach);
+            }
+            fornecedor.setEnviaList(attachedEnviaList);
             List<Notafiscal> attachedNotafiscalList = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNotafiscalToAttach : fornecedor.getNotafiscalList()) {
-                notafiscalListNotafiscalToAttach = em.getReference(notafiscalListNotafiscalToAttach.getClass(), notafiscalListNotafiscalToAttach.getNumeroNota());
+                notafiscalListNotafiscalToAttach = em.getReference(notafiscalListNotafiscalToAttach.getClass(), notafiscalListNotafiscalToAttach.getIdNotaFiscal());
                 attachedNotafiscalList.add(notafiscalListNotafiscalToAttach);
             }
             fornecedor.setNotafiscalList(attachedNotafiscalList);
             List<Processo> attachedProcessoList = new ArrayList<Processo>();
             for (Processo processoListProcessoToAttach : fornecedor.getProcessoList()) {
-                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getNumeroProcesso());
+                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getIdProcesso());
                 attachedProcessoList.add(processoListProcessoToAttach);
             }
             fornecedor.setProcessoList(attachedProcessoList);
-            List<Notafiscal> attachedNotafiscalList1 = new ArrayList<Notafiscal>();
-            for (Notafiscal notafiscalList1NotafiscalToAttach : fornecedor.getNotafiscalList1()) {
-                notafiscalList1NotafiscalToAttach = em.getReference(notafiscalList1NotafiscalToAttach.getClass(), notafiscalList1NotafiscalToAttach.getNumeroNota());
-                attachedNotafiscalList1.add(notafiscalList1NotafiscalToAttach);
-            }
-            fornecedor.setNotafiscalList1(attachedNotafiscalList1);
             em.persist(fornecedor);
+            for (Envia enviaListEnvia : fornecedor.getEnviaList()) {
+                Fornecedor oldIdFornecedorOfEnviaListEnvia = enviaListEnvia.getIdFornecedor();
+                enviaListEnvia.setIdFornecedor(fornecedor);
+                enviaListEnvia = em.merge(enviaListEnvia);
+                if (oldIdFornecedorOfEnviaListEnvia != null) {
+                    oldIdFornecedorOfEnviaListEnvia.getEnviaList().remove(enviaListEnvia);
+                    oldIdFornecedorOfEnviaListEnvia = em.merge(oldIdFornecedorOfEnviaListEnvia);
+                }
+            }
             for (Notafiscal notafiscalListNotafiscal : fornecedor.getNotafiscalList()) {
-                notafiscalListNotafiscal.getFornecedorList().add(fornecedor);
+                Fornecedor oldIdFornecedorOfNotafiscalListNotafiscal = notafiscalListNotafiscal.getIdFornecedor();
+                notafiscalListNotafiscal.setIdFornecedor(fornecedor);
                 notafiscalListNotafiscal = em.merge(notafiscalListNotafiscal);
+                if (oldIdFornecedorOfNotafiscalListNotafiscal != null) {
+                    oldIdFornecedorOfNotafiscalListNotafiscal.getNotafiscalList().remove(notafiscalListNotafiscal);
+                    oldIdFornecedorOfNotafiscalListNotafiscal = em.merge(oldIdFornecedorOfNotafiscalListNotafiscal);
+                }
             }
             for (Processo processoListProcesso : fornecedor.getProcessoList()) {
                 Fornecedor oldIdFornecedorOfProcessoListProcesso = processoListProcesso.getIdFornecedor();
@@ -77,15 +92,6 @@ public class FornecedorJpaController implements Serializable {
                 if (oldIdFornecedorOfProcessoListProcesso != null) {
                     oldIdFornecedorOfProcessoListProcesso.getProcessoList().remove(processoListProcesso);
                     oldIdFornecedorOfProcessoListProcesso = em.merge(oldIdFornecedorOfProcessoListProcesso);
-                }
-            }
-            for (Notafiscal notafiscalList1Notafiscal : fornecedor.getNotafiscalList1()) {
-                Fornecedor oldIdFornecedorOfNotafiscalList1Notafiscal = notafiscalList1Notafiscal.getIdFornecedor();
-                notafiscalList1Notafiscal.setIdFornecedor(fornecedor);
-                notafiscalList1Notafiscal = em.merge(notafiscalList1Notafiscal);
-                if (oldIdFornecedorOfNotafiscalList1Notafiscal != null) {
-                    oldIdFornecedorOfNotafiscalList1Notafiscal.getNotafiscalList1().remove(notafiscalList1Notafiscal);
-                    oldIdFornecedorOfNotafiscalList1Notafiscal = em.merge(oldIdFornecedorOfNotafiscalList1Notafiscal);
                 }
             }
             em.getTransaction().commit();
@@ -102,44 +108,66 @@ public class FornecedorJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Fornecedor persistentFornecedor = em.find(Fornecedor.class, fornecedor.getIdFornecedor());
+            List<Envia> enviaListOld = persistentFornecedor.getEnviaList();
+            List<Envia> enviaListNew = fornecedor.getEnviaList();
             List<Notafiscal> notafiscalListOld = persistentFornecedor.getNotafiscalList();
             List<Notafiscal> notafiscalListNew = fornecedor.getNotafiscalList();
             List<Processo> processoListOld = persistentFornecedor.getProcessoList();
             List<Processo> processoListNew = fornecedor.getProcessoList();
-            List<Notafiscal> notafiscalList1Old = persistentFornecedor.getNotafiscalList1();
-            List<Notafiscal> notafiscalList1New = fornecedor.getNotafiscalList1();
+            List<Envia> attachedEnviaListNew = new ArrayList<Envia>();
+            for (Envia enviaListNewEnviaToAttach : enviaListNew) {
+                enviaListNewEnviaToAttach = em.getReference(enviaListNewEnviaToAttach.getClass(), enviaListNewEnviaToAttach.getIdEnvia());
+                attachedEnviaListNew.add(enviaListNewEnviaToAttach);
+            }
+            enviaListNew = attachedEnviaListNew;
+            fornecedor.setEnviaList(enviaListNew);
             List<Notafiscal> attachedNotafiscalListNew = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNewNotafiscalToAttach : notafiscalListNew) {
-                notafiscalListNewNotafiscalToAttach = em.getReference(notafiscalListNewNotafiscalToAttach.getClass(), notafiscalListNewNotafiscalToAttach.getNumeroNota());
+                notafiscalListNewNotafiscalToAttach = em.getReference(notafiscalListNewNotafiscalToAttach.getClass(), notafiscalListNewNotafiscalToAttach.getIdNotaFiscal());
                 attachedNotafiscalListNew.add(notafiscalListNewNotafiscalToAttach);
             }
             notafiscalListNew = attachedNotafiscalListNew;
             fornecedor.setNotafiscalList(notafiscalListNew);
             List<Processo> attachedProcessoListNew = new ArrayList<Processo>();
             for (Processo processoListNewProcessoToAttach : processoListNew) {
-                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getNumeroProcesso());
+                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getIdProcesso());
                 attachedProcessoListNew.add(processoListNewProcessoToAttach);
             }
             processoListNew = attachedProcessoListNew;
             fornecedor.setProcessoList(processoListNew);
-            List<Notafiscal> attachedNotafiscalList1New = new ArrayList<Notafiscal>();
-            for (Notafiscal notafiscalList1NewNotafiscalToAttach : notafiscalList1New) {
-                notafiscalList1NewNotafiscalToAttach = em.getReference(notafiscalList1NewNotafiscalToAttach.getClass(), notafiscalList1NewNotafiscalToAttach.getNumeroNota());
-                attachedNotafiscalList1New.add(notafiscalList1NewNotafiscalToAttach);
-            }
-            notafiscalList1New = attachedNotafiscalList1New;
-            fornecedor.setNotafiscalList1(notafiscalList1New);
             fornecedor = em.merge(fornecedor);
+            for (Envia enviaListOldEnvia : enviaListOld) {
+                if (!enviaListNew.contains(enviaListOldEnvia)) {
+                    enviaListOldEnvia.setIdFornecedor(null);
+                    enviaListOldEnvia = em.merge(enviaListOldEnvia);
+                }
+            }
+            for (Envia enviaListNewEnvia : enviaListNew) {
+                if (!enviaListOld.contains(enviaListNewEnvia)) {
+                    Fornecedor oldIdFornecedorOfEnviaListNewEnvia = enviaListNewEnvia.getIdFornecedor();
+                    enviaListNewEnvia.setIdFornecedor(fornecedor);
+                    enviaListNewEnvia = em.merge(enviaListNewEnvia);
+                    if (oldIdFornecedorOfEnviaListNewEnvia != null && !oldIdFornecedorOfEnviaListNewEnvia.equals(fornecedor)) {
+                        oldIdFornecedorOfEnviaListNewEnvia.getEnviaList().remove(enviaListNewEnvia);
+                        oldIdFornecedorOfEnviaListNewEnvia = em.merge(oldIdFornecedorOfEnviaListNewEnvia);
+                    }
+                }
+            }
             for (Notafiscal notafiscalListOldNotafiscal : notafiscalListOld) {
                 if (!notafiscalListNew.contains(notafiscalListOldNotafiscal)) {
-                    notafiscalListOldNotafiscal.getFornecedorList().remove(fornecedor);
+                    notafiscalListOldNotafiscal.setIdFornecedor(null);
                     notafiscalListOldNotafiscal = em.merge(notafiscalListOldNotafiscal);
                 }
             }
             for (Notafiscal notafiscalListNewNotafiscal : notafiscalListNew) {
                 if (!notafiscalListOld.contains(notafiscalListNewNotafiscal)) {
-                    notafiscalListNewNotafiscal.getFornecedorList().add(fornecedor);
+                    Fornecedor oldIdFornecedorOfNotafiscalListNewNotafiscal = notafiscalListNewNotafiscal.getIdFornecedor();
+                    notafiscalListNewNotafiscal.setIdFornecedor(fornecedor);
                     notafiscalListNewNotafiscal = em.merge(notafiscalListNewNotafiscal);
+                    if (oldIdFornecedorOfNotafiscalListNewNotafiscal != null && !oldIdFornecedorOfNotafiscalListNewNotafiscal.equals(fornecedor)) {
+                        oldIdFornecedorOfNotafiscalListNewNotafiscal.getNotafiscalList().remove(notafiscalListNewNotafiscal);
+                        oldIdFornecedorOfNotafiscalListNewNotafiscal = em.merge(oldIdFornecedorOfNotafiscalListNewNotafiscal);
+                    }
                 }
             }
             for (Processo processoListOldProcesso : processoListOld) {
@@ -156,23 +184,6 @@ public class FornecedorJpaController implements Serializable {
                     if (oldIdFornecedorOfProcessoListNewProcesso != null && !oldIdFornecedorOfProcessoListNewProcesso.equals(fornecedor)) {
                         oldIdFornecedorOfProcessoListNewProcesso.getProcessoList().remove(processoListNewProcesso);
                         oldIdFornecedorOfProcessoListNewProcesso = em.merge(oldIdFornecedorOfProcessoListNewProcesso);
-                    }
-                }
-            }
-            for (Notafiscal notafiscalList1OldNotafiscal : notafiscalList1Old) {
-                if (!notafiscalList1New.contains(notafiscalList1OldNotafiscal)) {
-                    notafiscalList1OldNotafiscal.setIdFornecedor(null);
-                    notafiscalList1OldNotafiscal = em.merge(notafiscalList1OldNotafiscal);
-                }
-            }
-            for (Notafiscal notafiscalList1NewNotafiscal : notafiscalList1New) {
-                if (!notafiscalList1Old.contains(notafiscalList1NewNotafiscal)) {
-                    Fornecedor oldIdFornecedorOfNotafiscalList1NewNotafiscal = notafiscalList1NewNotafiscal.getIdFornecedor();
-                    notafiscalList1NewNotafiscal.setIdFornecedor(fornecedor);
-                    notafiscalList1NewNotafiscal = em.merge(notafiscalList1NewNotafiscal);
-                    if (oldIdFornecedorOfNotafiscalList1NewNotafiscal != null && !oldIdFornecedorOfNotafiscalList1NewNotafiscal.equals(fornecedor)) {
-                        oldIdFornecedorOfNotafiscalList1NewNotafiscal.getNotafiscalList1().remove(notafiscalList1NewNotafiscal);
-                        oldIdFornecedorOfNotafiscalList1NewNotafiscal = em.merge(oldIdFornecedorOfNotafiscalList1NewNotafiscal);
                     }
                 }
             }
@@ -205,20 +216,20 @@ public class FornecedorJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The fornecedor with id " + id + " no longer exists.", enfe);
             }
+            List<Envia> enviaList = fornecedor.getEnviaList();
+            for (Envia enviaListEnvia : enviaList) {
+                enviaListEnvia.setIdFornecedor(null);
+                enviaListEnvia = em.merge(enviaListEnvia);
+            }
             List<Notafiscal> notafiscalList = fornecedor.getNotafiscalList();
             for (Notafiscal notafiscalListNotafiscal : notafiscalList) {
-                notafiscalListNotafiscal.getFornecedorList().remove(fornecedor);
+                notafiscalListNotafiscal.setIdFornecedor(null);
                 notafiscalListNotafiscal = em.merge(notafiscalListNotafiscal);
             }
             List<Processo> processoList = fornecedor.getProcessoList();
             for (Processo processoListProcesso : processoList) {
                 processoListProcesso.setIdFornecedor(null);
                 processoListProcesso = em.merge(processoListProcesso);
-            }
-            List<Notafiscal> notafiscalList1 = fornecedor.getNotafiscalList1();
-            for (Notafiscal notafiscalList1Notafiscal : notafiscalList1) {
-                notafiscalList1Notafiscal.setIdFornecedor(null);
-                notafiscalList1Notafiscal = em.merge(notafiscalList1Notafiscal);
             }
             em.remove(fornecedor);
             em.getTransaction().commit();

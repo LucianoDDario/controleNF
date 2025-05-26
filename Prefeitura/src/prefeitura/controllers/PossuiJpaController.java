@@ -13,10 +13,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
-import prefeitura.controllers.exceptions.PreexistingEntityException;
 import prefeitura.entities.Notafiscal;
 import prefeitura.entities.Possui;
-import prefeitura.entities.PossuiPK;
 import prefeitura.entities.Processo;
 import prefeitura.entities.Protocolo;
 
@@ -35,51 +33,40 @@ public class PossuiJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Possui possui) throws PreexistingEntityException, Exception {
-        if (possui.getPossuiPK() == null) {
-            possui.setPossuiPK(new PossuiPK());
-        }
-        possui.getPossuiPK().setNumeroProcesso(possui.getProcesso().getNumeroProcesso());
-        possui.getPossuiPK().setNumeroNota(possui.getNotafiscal().getNumeroNota());
-        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
+    public void create(Possui possui) {
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Notafiscal notafiscal = possui.getNotafiscal();
-            if (notafiscal != null) {
-                notafiscal = em.getReference(notafiscal.getClass(), notafiscal.getNumeroNota());
-                possui.setNotafiscal(notafiscal);
+            Notafiscal numeroNota = possui.getNumeroNota();
+            if (numeroNota != null) {
+                numeroNota = em.getReference(numeroNota.getClass(), numeroNota.getIdNotaFiscal());
+                possui.setNumeroNota(numeroNota);
             }
-            Processo processo = possui.getProcesso();
-            if (processo != null) {
-                processo = em.getReference(processo.getClass(), processo.getNumeroProcesso());
-                possui.setProcesso(processo);
+            Processo numeroProcesso = possui.getNumeroProcesso();
+            if (numeroProcesso != null) {
+                numeroProcesso = em.getReference(numeroProcesso.getClass(), numeroProcesso.getIdProcesso());
+                possui.setNumeroProcesso(numeroProcesso);
             }
-            Protocolo protocolo = possui.getProtocolo();
-            if (protocolo != null) {
-                protocolo = em.getReference(protocolo.getClass(), protocolo.getNumeroProtocolo());
-                possui.setProtocolo(protocolo);
+            Protocolo numeroProtocolo = possui.getNumeroProtocolo();
+            if (numeroProtocolo != null) {
+                numeroProtocolo = em.getReference(numeroProtocolo.getClass(), numeroProtocolo.getIdProtocolo());
+                possui.setNumeroProtocolo(numeroProtocolo);
             }
             em.persist(possui);
-            if (notafiscal != null) {
-                notafiscal.getPossuiList().add(possui);
-                notafiscal = em.merge(notafiscal);
+            if (numeroNota != null) {
+                numeroNota.getPossuiList().add(possui);
+                numeroNota = em.merge(numeroNota);
             }
-            if (processo != null) {
-                processo.getPossuiList().add(possui);
-                processo = em.merge(processo);
+            if (numeroProcesso != null) {
+                numeroProcesso.getPossuiList().add(possui);
+                numeroProcesso = em.merge(numeroProcesso);
             }
-            if (protocolo != null) {
-                protocolo.getPossuiList().add(possui);
-                protocolo = em.merge(protocolo);
+            if (numeroProtocolo != null) {
+                numeroProtocolo.getPossuiList().add(possui);
+                numeroProtocolo = em.merge(numeroProtocolo);
             }
             em.getTransaction().commit();
-        } catch (Exception ex) {
-            if (findPossui(possui.getPossuiPK()) != null) {
-                throw new PreexistingEntityException("Possui " + possui + " already exists.", ex);
-            }
-            throw ex;
         } finally {
             if (em != null) {
                 em.close();
@@ -88,62 +75,59 @@ public class PossuiJpaController implements Serializable {
     }
 
     public void edit(Possui possui) throws NonexistentEntityException, Exception {
-        possui.getPossuiPK().setNumeroProcesso(possui.getProcesso().getNumeroProcesso());
-        possui.getPossuiPK().setNumeroNota(possui.getNotafiscal().getNumeroNota());
-        possui.getPossuiPK().setNumeroProtocolo(possui.getProtocolo().getNumeroProtocolo());
         EntityManager em = null;
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Possui persistentPossui = em.find(Possui.class, possui.getPossuiPK());
-            Notafiscal notafiscalOld = persistentPossui.getNotafiscal();
-            Notafiscal notafiscalNew = possui.getNotafiscal();
-            Processo processoOld = persistentPossui.getProcesso();
-            Processo processoNew = possui.getProcesso();
-            Protocolo protocoloOld = persistentPossui.getProtocolo();
-            Protocolo protocoloNew = possui.getProtocolo();
-            if (notafiscalNew != null) {
-                notafiscalNew = em.getReference(notafiscalNew.getClass(), notafiscalNew.getNumeroNota());
-                possui.setNotafiscal(notafiscalNew);
+            Possui persistentPossui = em.find(Possui.class, possui.getIdPossui());
+            Notafiscal numeroNotaOld = persistentPossui.getNumeroNota();
+            Notafiscal numeroNotaNew = possui.getNumeroNota();
+            Processo numeroProcessoOld = persistentPossui.getNumeroProcesso();
+            Processo numeroProcessoNew = possui.getNumeroProcesso();
+            Protocolo numeroProtocoloOld = persistentPossui.getNumeroProtocolo();
+            Protocolo numeroProtocoloNew = possui.getNumeroProtocolo();
+            if (numeroNotaNew != null) {
+                numeroNotaNew = em.getReference(numeroNotaNew.getClass(), numeroNotaNew.getIdNotaFiscal());
+                possui.setNumeroNota(numeroNotaNew);
             }
-            if (processoNew != null) {
-                processoNew = em.getReference(processoNew.getClass(), processoNew.getNumeroProcesso());
-                possui.setProcesso(processoNew);
+            if (numeroProcessoNew != null) {
+                numeroProcessoNew = em.getReference(numeroProcessoNew.getClass(), numeroProcessoNew.getIdProcesso());
+                possui.setNumeroProcesso(numeroProcessoNew);
             }
-            if (protocoloNew != null) {
-                protocoloNew = em.getReference(protocoloNew.getClass(), protocoloNew.getNumeroProtocolo());
-                possui.setProtocolo(protocoloNew);
+            if (numeroProtocoloNew != null) {
+                numeroProtocoloNew = em.getReference(numeroProtocoloNew.getClass(), numeroProtocoloNew.getIdProtocolo());
+                possui.setNumeroProtocolo(numeroProtocoloNew);
             }
             possui = em.merge(possui);
-            if (notafiscalOld != null && !notafiscalOld.equals(notafiscalNew)) {
-                notafiscalOld.getPossuiList().remove(possui);
-                notafiscalOld = em.merge(notafiscalOld);
+            if (numeroNotaOld != null && !numeroNotaOld.equals(numeroNotaNew)) {
+                numeroNotaOld.getPossuiList().remove(possui);
+                numeroNotaOld = em.merge(numeroNotaOld);
             }
-            if (notafiscalNew != null && !notafiscalNew.equals(notafiscalOld)) {
-                notafiscalNew.getPossuiList().add(possui);
-                notafiscalNew = em.merge(notafiscalNew);
+            if (numeroNotaNew != null && !numeroNotaNew.equals(numeroNotaOld)) {
+                numeroNotaNew.getPossuiList().add(possui);
+                numeroNotaNew = em.merge(numeroNotaNew);
             }
-            if (processoOld != null && !processoOld.equals(processoNew)) {
-                processoOld.getPossuiList().remove(possui);
-                processoOld = em.merge(processoOld);
+            if (numeroProcessoOld != null && !numeroProcessoOld.equals(numeroProcessoNew)) {
+                numeroProcessoOld.getPossuiList().remove(possui);
+                numeroProcessoOld = em.merge(numeroProcessoOld);
             }
-            if (processoNew != null && !processoNew.equals(processoOld)) {
-                processoNew.getPossuiList().add(possui);
-                processoNew = em.merge(processoNew);
+            if (numeroProcessoNew != null && !numeroProcessoNew.equals(numeroProcessoOld)) {
+                numeroProcessoNew.getPossuiList().add(possui);
+                numeroProcessoNew = em.merge(numeroProcessoNew);
             }
-            if (protocoloOld != null && !protocoloOld.equals(protocoloNew)) {
-                protocoloOld.getPossuiList().remove(possui);
-                protocoloOld = em.merge(protocoloOld);
+            if (numeroProtocoloOld != null && !numeroProtocoloOld.equals(numeroProtocoloNew)) {
+                numeroProtocoloOld.getPossuiList().remove(possui);
+                numeroProtocoloOld = em.merge(numeroProtocoloOld);
             }
-            if (protocoloNew != null && !protocoloNew.equals(protocoloOld)) {
-                protocoloNew.getPossuiList().add(possui);
-                protocoloNew = em.merge(protocoloNew);
+            if (numeroProtocoloNew != null && !numeroProtocoloNew.equals(numeroProtocoloOld)) {
+                numeroProtocoloNew.getPossuiList().add(possui);
+                numeroProtocoloNew = em.merge(numeroProtocoloNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
             if (msg == null || msg.length() == 0) {
-                PossuiPK id = possui.getPossuiPK();
+                Integer id = possui.getIdPossui();
                 if (findPossui(id) == null) {
                     throw new NonexistentEntityException("The possui with id " + id + " no longer exists.");
                 }
@@ -156,7 +140,7 @@ public class PossuiJpaController implements Serializable {
         }
     }
 
-    public void destroy(PossuiPK id) throws NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -164,24 +148,24 @@ public class PossuiJpaController implements Serializable {
             Possui possui;
             try {
                 possui = em.getReference(Possui.class, id);
-                possui.getPossuiPK();
+                possui.getIdPossui();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The possui with id " + id + " no longer exists.", enfe);
             }
-            Notafiscal notafiscal = possui.getNotafiscal();
-            if (notafiscal != null) {
-                notafiscal.getPossuiList().remove(possui);
-                notafiscal = em.merge(notafiscal);
+            Notafiscal numeroNota = possui.getNumeroNota();
+            if (numeroNota != null) {
+                numeroNota.getPossuiList().remove(possui);
+                numeroNota = em.merge(numeroNota);
             }
-            Processo processo = possui.getProcesso();
-            if (processo != null) {
-                processo.getPossuiList().remove(possui);
-                processo = em.merge(processo);
+            Processo numeroProcesso = possui.getNumeroProcesso();
+            if (numeroProcesso != null) {
+                numeroProcesso.getPossuiList().remove(possui);
+                numeroProcesso = em.merge(numeroProcesso);
             }
-            Protocolo protocolo = possui.getProtocolo();
-            if (protocolo != null) {
-                protocolo.getPossuiList().remove(possui);
-                protocolo = em.merge(protocolo);
+            Protocolo numeroProtocolo = possui.getNumeroProtocolo();
+            if (numeroProtocolo != null) {
+                numeroProtocolo.getPossuiList().remove(possui);
+                numeroProtocolo = em.merge(numeroProtocolo);
             }
             em.remove(possui);
             em.getTransaction().commit();
@@ -216,7 +200,7 @@ public class PossuiJpaController implements Serializable {
         }
     }
 
-    public Possui findPossui(PossuiPK id) {
+    public Possui findPossui(Integer id) {
         EntityManager em = getEntityManager();
         try {
             return em.find(Possui.class, id);

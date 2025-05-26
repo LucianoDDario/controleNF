@@ -12,9 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -46,17 +43,14 @@ public class Usuario implements Serializable {
     private String senha;
     @Column(name = "TipoAcesso")
     private String tipoAcesso;
-    @JoinTable(name = "monitora", joinColumns = {
-        @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")}, inverseJoinColumns = {
-        @JoinColumn(name = "IdLog", referencedColumnName = "IdLog")})
-    @ManyToMany
-    private List<Logsistema> logsistemaList;
-    @ManyToMany(mappedBy = "usuarioList")
-    private List<Processo> processoList;
-    @ManyToMany(mappedBy = "usuarioList")
-    private List<Oficio> oficioList;
     @OneToMany(mappedBy = "idUsuario")
-    private List<Logsistema> logsistemaList1;
+    private List<Monitora> monitoraList;
+    @OneToMany(mappedBy = "idUsuario")
+    private List<Cria> criaList;
+    @OneToMany(mappedBy = "idUsuario")
+    private List<Logsistema> logsistemaList;
+    @OneToMany(mappedBy = "idUsuario")
+    private List<Recebe> recebeList;
 
     public Usuario() {
     }
@@ -97,6 +91,22 @@ public class Usuario implements Serializable {
         this.tipoAcesso = tipoAcesso;
     }
 
+    public List<Monitora> getMonitoraList() {
+        return monitoraList;
+    }
+
+    public void setMonitoraList(List<Monitora> monitoraList) {
+        this.monitoraList = monitoraList;
+    }
+
+    public List<Cria> getCriaList() {
+        return criaList;
+    }
+
+    public void setCriaList(List<Cria> criaList) {
+        this.criaList = criaList;
+    }
+
     public List<Logsistema> getLogsistemaList() {
         return logsistemaList;
     }
@@ -105,28 +115,12 @@ public class Usuario implements Serializable {
         this.logsistemaList = logsistemaList;
     }
 
-    public List<Processo> getProcessoList() {
-        return processoList;
+    public List<Recebe> getRecebeList() {
+        return recebeList;
     }
 
-    public void setProcessoList(List<Processo> processoList) {
-        this.processoList = processoList;
-    }
-
-    public List<Oficio> getOficioList() {
-        return oficioList;
-    }
-
-    public void setOficioList(List<Oficio> oficioList) {
-        this.oficioList = oficioList;
-    }
-
-    public List<Logsistema> getLogsistemaList1() {
-        return logsistemaList1;
-    }
-
-    public void setLogsistemaList1(List<Logsistema> logsistemaList1) {
-        this.logsistemaList1 = logsistemaList1;
+    public void setRecebeList(List<Recebe> recebeList) {
+        this.recebeList = recebeList;
     }
 
     @Override

@@ -5,11 +5,13 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -17,6 +19,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  *
@@ -26,30 +30,43 @@ import javax.persistence.Table;
 @Table(name = "protocolo")
 @NamedQueries({
     @NamedQuery(name = "Protocolo.findAll", query = "SELECT p FROM Protocolo p"),
+    @NamedQuery(name = "Protocolo.findByIdProtocolo", query = "SELECT p FROM Protocolo p WHERE p.idProtocolo = :idProtocolo"),
     @NamedQuery(name = "Protocolo.findByNumeroProtocolo", query = "SELECT p FROM Protocolo p WHERE p.numeroProtocolo = :numeroProtocolo"),
     @NamedQuery(name = "Protocolo.findByDataProtocolo", query = "SELECT p FROM Protocolo p WHERE p.dataProtocolo = :dataProtocolo")})
 public class Protocolo implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
+    @Column(name = "IdProtocolo")
+    private Integer idProtocolo;
     @Column(name = "NumeroProtocolo")
     private Integer numeroProtocolo;
     @Column(name = "DataProtocolo")
-    private String dataProtocolo;
+    @Temporal(TemporalType.DATE)
+    private Date dataProtocolo;
+    @OneToMany(mappedBy = "numeroProtocolo")
+    private List<Possui> possuiList;
+    @OneToMany(mappedBy = "idProtocolo")
+    private List<Notafiscal> notafiscalList;
     @JoinColumn(name = "NumeroNota", referencedColumnName = "NumeroNota")
     @ManyToOne
     private Notafiscal numeroNota;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "protocolo")
-    private List<Possui> possuiList;
-    @OneToMany(mappedBy = "numeroProtocolo")
-    private List<Notafiscal> notafiscalList;
 
     public Protocolo() {
     }
 
-    public Protocolo(Integer numeroProtocolo) {
-        this.numeroProtocolo = numeroProtocolo;
+    public Protocolo(Integer idProtocolo) {
+        this.idProtocolo = idProtocolo;
+    }
+
+    public Integer getIdProtocolo() {
+        return idProtocolo;
+    }
+
+    public void setIdProtocolo(Integer idProtocolo) {
+        this.idProtocolo = idProtocolo;
     }
 
     public Integer getNumeroProtocolo() {
@@ -60,20 +77,12 @@ public class Protocolo implements Serializable {
         this.numeroProtocolo = numeroProtocolo;
     }
 
-    public String getDataProtocolo() {
+    public Date getDataProtocolo() {
         return dataProtocolo;
     }
 
-    public void setDataProtocolo(String dataProtocolo) {
+    public void setDataProtocolo(Date dataProtocolo) {
         this.dataProtocolo = dataProtocolo;
-    }
-
-    public Notafiscal getNumeroNota() {
-        return numeroNota;
-    }
-
-    public void setNumeroNota(Notafiscal numeroNota) {
-        this.numeroNota = numeroNota;
     }
 
     public List<Possui> getPossuiList() {
@@ -92,10 +101,18 @@ public class Protocolo implements Serializable {
         this.notafiscalList = notafiscalList;
     }
 
+    public Notafiscal getNumeroNota() {
+        return numeroNota;
+    }
+
+    public void setNumeroNota(Notafiscal numeroNota) {
+        this.numeroNota = numeroNota;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (numeroProtocolo != null ? numeroProtocolo.hashCode() : 0);
+        hash += (idProtocolo != null ? idProtocolo.hashCode() : 0);
         return hash;
     }
 
@@ -106,7 +123,7 @@ public class Protocolo implements Serializable {
             return false;
         }
         Protocolo other = (Protocolo) object;
-        if ((this.numeroProtocolo == null && other.numeroProtocolo != null) || (this.numeroProtocolo != null && !this.numeroProtocolo.equals(other.numeroProtocolo))) {
+        if ((this.idProtocolo == null && other.idProtocolo != null) || (this.idProtocolo != null && !this.idProtocolo.equals(other.idProtocolo))) {
             return false;
         }
         return true;
@@ -114,7 +131,7 @@ public class Protocolo implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Protocolo[ numeroProtocolo=" + numeroProtocolo + " ]";
+        return "prefeitura.entities.Protocolo[ idProtocolo=" + idProtocolo + " ]";
     }
     
 }

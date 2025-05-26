@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -41,14 +40,19 @@ public class Fornecedor implements Serializable {
     private String nomeEmpresa;
     @Column(name = "CNPJ")
     private String cnpj;
-    @ManyToMany(mappedBy = "fornecedorList")
+    @OneToMany(mappedBy = "idFornecedor")
+    private List<Envia> enviaList;
+    @OneToMany(mappedBy = "idFornecedor")
     private List<Notafiscal> notafiscalList;
     @OneToMany(mappedBy = "idFornecedor")
     private List<Processo> processoList;
-    @OneToMany(mappedBy = "idFornecedor")
-    private List<Notafiscal> notafiscalList1;
 
     public Fornecedor() {
+    }
+
+    public Fornecedor(String nomeEmpresa, String cnpj) {
+        this.nomeEmpresa = nomeEmpresa;
+        this.cnpj = cnpj;
     }
 
     public Fornecedor(Integer idFornecedor) {
@@ -79,6 +83,14 @@ public class Fornecedor implements Serializable {
         this.cnpj = cnpj;
     }
 
+    public List<Envia> getEnviaList() {
+        return enviaList;
+    }
+
+    public void setEnviaList(List<Envia> enviaList) {
+        this.enviaList = enviaList;
+    }
+
     public List<Notafiscal> getNotafiscalList() {
         return notafiscalList;
     }
@@ -93,14 +105,6 @@ public class Fornecedor implements Serializable {
 
     public void setProcessoList(List<Processo> processoList) {
         this.processoList = processoList;
-    }
-
-    public List<Notafiscal> getNotafiscalList1() {
-        return notafiscalList1;
-    }
-
-    public void setNotafiscalList1(List<Notafiscal> notafiscalList1) {
-        this.notafiscalList1 = notafiscalList1;
     }
 
     @Override
