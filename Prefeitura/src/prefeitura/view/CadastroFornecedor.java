@@ -13,7 +13,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import org.eclipse.persistence.exceptions.DatabaseException;
 import org.json.JSONObject;
 import prefeitura.controllers.*;
 
@@ -265,7 +264,7 @@ public class CadastroFornecedor extends javax.swing.JFrame {
             if (CNPJ.isEmpty() || nomeEmpresa.isEmpty()) {
                 throw new Exception("Preencha todos os campos");
             }
-            prefeitura.entities.Fornecedor fornecedor = new prefeitura.entities.Fornecedor(nomeEmpresa, CNPJ);
+            prefeitura.entities.Fornecedor fornecedor = new prefeitura.entities.Fornecedor(null,nomeEmpresa, CNPJ);
             fornecedorController.create(fornecedor);
         }catch (Exception e) {
             JOptionPane.showMessageDialog(this,

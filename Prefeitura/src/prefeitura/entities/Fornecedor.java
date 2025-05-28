@@ -46,11 +46,14 @@ public class Fornecedor implements Serializable {
     private List<Notafiscal> notafiscalList;
     @OneToMany(mappedBy = "idFornecedor")
     private List<Processo> processoList;
+    
+    
 
     public Fornecedor() {
     }
 
-    public Fornecedor(String nomeEmpresa, String cnpj) {
+    public Fornecedor(Integer idFornecedor, String nomeEmpresa, String cnpj) {
+        this.idFornecedor = idFornecedor;
         this.nomeEmpresa = nomeEmpresa;
         this.cnpj = cnpj;
     }
@@ -129,7 +132,7 @@ public class Fornecedor implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Fornecedor[ idFornecedor=" + idFornecedor + " ]";
+        return String.valueOf(idFornecedor);
     }
     
 }

@@ -170,7 +170,7 @@ public class Oficio extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID OFício", "Data", "Número", "Secretaria", "Descrição"
+                "Protocolo", "Data", "Número", "Secretaria", "Descrição"
             }
         ) {
             Class[] types = new Class [] {
@@ -209,9 +209,7 @@ public class Oficio extends javax.swing.JFrame {
             }
         });
 
-        jTextField4.setEnabled(false);
-
-        jLabel5.setText("ID");
+        jLabel5.setText("Protocolo do Oficio");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -284,7 +282,7 @@ public class Oficio extends javax.swing.JFrame {
                             .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(144, Short.MAX_VALUE))
+                .addContainerGap(49, Short.MAX_VALUE))
         );
 
         pack();
@@ -336,10 +334,12 @@ public class Oficio extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        String idOficio = jTextField4.getText();
         String dataStr = jTextField1.getText();
         String numeroOficio = jTextField2.getText();
         String descricao = jTextField3.getText();        
         Secretaria secretaria = (Secretaria) jComboBox1.getSelectedItem();        
+        System.out.println(idOficio);
         
         SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
         
@@ -347,7 +347,7 @@ public class Oficio extends javax.swing.JFrame {
             if(dataStr.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()){
                 throw new Exception("Preencha todos os campos");
             }
-            prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(null, Integer.valueOf(numeroOficio), descricao, formato.parse(dataStr), secretaria);
+            prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(Integer.valueOf(idOficio), Integer.valueOf(numeroOficio), descricao, formato.parse(dataStr), secretaria);
             oficioController.create(oficio);
             
         } catch (Exception e) {

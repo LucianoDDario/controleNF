@@ -108,7 +108,7 @@ public class Secretaria implements Serializable {
 
     @Override
     public String toString() {
-        return idSecretaria + " - " + nomeSecretaria;
+        return idSecretaria + "-" + nomeSecretaria;
     }
     
 }

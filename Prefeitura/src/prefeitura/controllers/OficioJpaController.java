@@ -16,6 +16,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
+import prefeitura.controllers.exceptions.PreexistingEntityException;
 import prefeitura.entities.Envia1;
 import prefeitura.entities.Oficio;
 import prefeitura.entities.Processo;
@@ -36,7 +37,7 @@ public class OficioJpaController implements Serializable {
         return emf.createEntityManager();
     }
 
-    public void create(Oficio oficio) {
+    public void create(Oficio oficio) throws PreexistingEntityException, Exception {
         if (oficio.getPossui1List() == null) {
             oficio.setPossui1List(new ArrayList<Possui1>());
         }
@@ -124,6 +125,11 @@ public class OficioJpaController implements Serializable {
                 }
             }
             em.getTransaction().commit();
+        } catch (Exception ex) {
+            if (findOficio(oficio.getIdOficio()) != null) {
+                throw new PreexistingEntityException("Oficio " + oficio + " already exists.", ex);
+            }
+            throw ex;
         } finally {
             if (em != null) {
                 em.close();

@@ -17,6 +17,7 @@
     <class>prefeitura.entities.Protocolo</class>
     <class>prefeitura.entities.Processo</class>
     <class>prefeitura.entities.Recebe</class>
+    <class>.Oficio</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/controlenf?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

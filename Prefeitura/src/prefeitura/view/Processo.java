@@ -5,9 +5,14 @@
 package prefeitura.view;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import prefeitura.controllers.FornecedorJpaController;
 import prefeitura.controllers.OficioJpaController;
 import prefeitura.controllers.SecretariaJpaController;
 import prefeitura.controllers.ProcessoJpaController;
@@ -22,30 +27,38 @@ public class Processo extends javax.swing.JFrame {
     OficioJpaController oficioController;
     SecretariaJpaController secretariaController;
     ProcessoJpaController processoController;
-    
+    FornecedorJpaController fornecedorController;
+
     public Processo() {
         initComponents();
         abrirConexao();
+        atualizarTabela();
         limpar();
+        atualizarTabelaFornecedor();
     }
-    
-    private void abrirConexao(){
-        try{
+
+    public void campoFornecedor() {
+
+    }
+
+    private void abrirConexao() {
+        try {
             factory = Persistence.createEntityManagerFactory("PrefeituraFuncionandoPU");
             oficioController = new OficioJpaController(factory);
             secretariaController = new SecretariaJpaController(factory);
             processoController = new ProcessoJpaController(factory);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(this, 
-            e.getMessage(),
-            "ERRO",
-            JOptionPane.ERROR_MESSAGE);
-            
+            fornecedorController = new FornecedorJpaController(factory);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
         }
     }
-    
-    private void limpar(){
-        
+
+    private void limpar() {
+
         jTextField1.setText("");
         jTextField2.setText("");
         jTextField3.setText("");
@@ -59,10 +72,79 @@ public class Processo extends javax.swing.JFrame {
         jButton4.setEnabled(false);
         jButton6.setEnabled(true);
         jButton5.setEnabled(false);
-        jTextField5.requestFocus();
+        jTextField4.requestFocus();
+        jTextField4.setEnabled(true);
+
+        jTextField4.setEnabled(true);
+        jTextField5.setEnabled(false);
+        jTextField1.setEnabled(false);
+        jTextField2.setEnabled(false);
+        jTextField3.setEnabled(false);
+        jTextField7.setEnabled(false);
+        jButton2.setEnabled(false);
+        jComboBox1.setEnabled(false);
+
     }
-    
-    
+
+    private void atualizarTabela() {
+
+        ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
+        try {
+            List<prefeitura.entities.Oficio> oficios = oficioController.findOficioEntities();
+            
+                        
+            
+            SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+            for (prefeitura.entities.Oficio oficio : oficios) {
+                
+                List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
+                
+                
+                
+                    String dataFormatada = formato.format(oficio.getDataOficio());
+                    String linha[] = {
+                    String.valueOf(oficio.getIdOficio()),                    
+                    String.valueOf(oficio.getNumeroOficio()),
+                    dataFormatada,
+                    String.valueOf(processos.),
+                    String.valueOf(oficio.getIdSecretaria()),
+                    oficio.getDescricao()                    
+                };
+                ((DefaultTableModel) jTable1.getModel()).addRow(linha);
+            }
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+    }
+
+    private void atualizarTabelaFornecedor() {
+        ((DefaultTableModel) jTable2.getModel()).setRowCount(0);
+        try {
+            List<prefeitura.entities.Fornecedor> fornecedores = fornecedorController.findFornecedorEntities();
+            for (prefeitura.entities.Fornecedor fornecedor : fornecedores) {
+                String linha[] = {
+                    String.valueOf(fornecedor.getIdFornecedor()),
+                    String.valueOf(fornecedor.getCnpj()),
+                    String.valueOf(fornecedor.getNomeEmpresa())
+
+                };
+                ((DefaultTableModel) jTable2.getModel()).addRow(linha);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -72,6 +154,11 @@ public class Processo extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jDialog1 = new javax.swing.JDialog();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jButton7 = new javax.swing.JButton();
+        jTextField8 = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jTextField2 = new javax.swing.JTextField();
@@ -95,19 +182,99 @@ public class Processo extends javax.swing.JFrame {
         jTextField6 = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         jTextField7 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
+
+        jDialog1.setTitle("Pesquisa fornecedor");
+        jDialog1.setMinimumSize(new java.awt.Dimension(572, 244));
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "CNPJ", "Nome da Empresa"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTable2.getTableHeader().setReorderingAllowed(false);
+        jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable2MouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTable2);
+
+        jButton7.setText("jButton1");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        jTextField8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField8ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
+        jDialog1.getContentPane().setLayout(jDialog1Layout);
+        jDialog1Layout.setHorizontalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jDialog1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(386, 386, 386))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jDialog1Layout.createSequentialGroup()
+                .addContainerGap(19, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 534, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(19, 19, 19))
+        );
+        jDialog1Layout.setVerticalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jDialog1Layout.createSequentialGroup()
+                .addContainerGap(42, Short.MAX_VALUE)
+                .addGroup(jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(19, 19, 19))
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Cadastro de Processo");
 
         jLabel2.setText("Número do Processo");
 
-        jTextField1.setEditable(false);
+        jTextField1.setEnabled(false);
 
-        jTextField2.setEditable(false);
+        jTextField2.setEnabled(false);
 
         jLabel4.setText("Data");
 
-        jTextField3.setEditable(false);
+        jTextField3.setEnabled(false);
+        jTextField3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTextField3MouseClicked(evt);
+            }
+        });
 
         jButton1.setText("Voltar");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -116,8 +283,11 @@ public class Processo extends javax.swing.JFrame {
             }
         });
 
-        jTextField4.setEditable(false);
-        jTextField4.setEnabled(false);
+        jTextField4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField4ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Inserir");
         jButton3.setEnabled(false);
@@ -127,7 +297,7 @@ public class Processo extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setText("ID");
+        jLabel5.setText("Protoco do Ofício");
 
         jButton4.setText("Deletar");
         jButton4.setEnabled(false);
@@ -147,7 +317,7 @@ public class Processo extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID Processo", "Oficio", "Número", "Data", "Tipo", "Secretaria", "Descrição", "Fornecedor"
+                "Protocolo", "Oficio", "Número", "Data", "Tipo", "Secretaria", "Descrição", "Fornecedor"
             }
         ) {
             Class[] types = new Class [] {
@@ -169,27 +339,37 @@ public class Processo extends javax.swing.JFrame {
         jTable1.getTableHeader().setReorderingAllowed(false);
         jScrollPane5.setViewportView(jTable1);
 
-        jLabel1.setText("Numero do Ofício");
+        jLabel1.setText("Ofício");
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dispensa", "Inexibilidade" }));
+        jComboBox1.setEnabled(false);
 
         jLabel6.setText("Tipo");
 
         jLabel8.setText("Secretaria");
 
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
-            }
-        });
+        jTextField5.setEnabled(false);
 
         jLabel9.setText("Descrição");
 
-        jTextField6.setEditable(false);
+        jTextField6.setEnabled(false);
 
         jLabel10.setText("Fornecedor");
 
-        jTextField7.setEditable(false);
+        jTextField7.setEnabled(false);
+        jTextField7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField7ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("jButton2");
+        jButton2.setEnabled(false);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -201,7 +381,7 @@ public class Processo extends javax.swing.JFrame {
                         .addGap(16, 16, 16)
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(67, 67, 67)
+                        .addGap(28, 28, 28)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane5)
                             .addGroup(layout.createSequentialGroup()
@@ -229,14 +409,17 @@ public class Processo extends javax.swing.JFrame {
                                     .addComponent(jComboBox1, 0, 145, Short.MAX_VALUE)
                                     .addComponent(jTextField1)
                                     .addComponent(jTextField6)
-                                    .addComponent(jTextField7))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 97, Short.MAX_VALUE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton3))))))
-                .addGap(67, 67, 67))
+                                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                .addGap(28, 28, 28))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -280,7 +463,8 @@ public class Processo extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButton2))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -289,7 +473,7 @@ public class Processo extends javax.swing.JFrame {
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jTextField6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                .addContainerGap(155, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -303,18 +487,24 @@ public class Processo extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         String dataStr = jTextField3.getText();
         String numeroProcesso = jTextField2.getText();
-        String tipo = (String)jComboBox1.getSelectedItem();
-        String fornecedor = jTextField7.get();
+        String tipo = (String) jComboBox1.getSelectedItem();
+        String numeroProtocolo = jTextField4.getText();
         
+
         SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-        
-        try{
-            if(dataStr.isEmpty() || numeroProcesso.isEmpty()){
+
+        try {
+            if (dataStr.isEmpty() || numeroProcesso.isEmpty()) {
                 throw new Exception("Preencha todos os campos");
             }
-            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(null, Integer.valueOf(numeroProcesso), tipo, formato.parse(dataStr), fornecedor);
+            prefeitura.entities.Fornecedor fornecedor = fornecedorController.findFornecedor(Integer.valueOf(jTextField7.getText()));
+            prefeitura.entities.Oficio oficio = oficioController.findOficio(Integer.valueOf(numeroProtocolo));
             
-        }catch (Exception e) {
+            
+            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(null, Integer.valueOf(numeroProcesso), tipo, formato.parse(dataStr), fornecedor, oficio);
+            processoController.create(processo);
+            atualizarTabela();
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
                     "ERRO",
@@ -324,13 +514,110 @@ public class Processo extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-    limpar();
+        limpar();
     }//GEN-LAST:event_jButton6ActionPerformed
 
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
-        String numeroOficio = jTextField5.getText();
-        jTextField2.setEnabled(true);
-    }//GEN-LAST:event_jTextField5ActionPerformed
+    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
+        String numeroProtocolo = jTextField4.getText();
+
+        try {
+
+            if (numeroProtocolo.isEmpty()) {
+                throw new Exception("Preencha o campo número de ofício");
+            }
+            prefeitura.entities.Oficio oficio = oficioController.findOficio(Integer.valueOf(numeroProtocolo));
+
+            if (oficio == null) {
+                throw new Exception("Número do ofício não encontrado!");
+            }
+
+            prefeitura.entities.Secretaria secretaria = oficio.getIdSecretaria();
+
+            jTextField4.setText(String.valueOf(oficio.getIdOficio()));
+            jTextField5.setText(String.valueOf(oficio.getNumeroOficio()));
+            jTextField6.setText(oficio.getDescricao());
+            jTextField1.setText(String.valueOf(secretaria.getNomeSecretaria()));
+            jTextField4.setEnabled(false);
+            jTextField5.setEnabled(false);
+            jTextField2.setEnabled(true);
+            jTextField3.setEnabled(true);
+            jTextField7.setEnabled(true);
+            jButton2.setEnabled(true);
+            jComboBox1.setEnabled(true);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jTextField4ActionPerformed
+
+    private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField7ActionPerformed
+
+    }//GEN-LAST:event_jTextField7ActionPerformed
+
+    private void jTextField3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextField3MouseClicked
+        jTextField3.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+    }//GEN-LAST:event_jTextField3MouseClicked
+
+    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable2MouseClicked
+        if (evt.getClickCount() == 2) {
+            int i = jTable2.getSelectedRow();
+            jTextField7.setText(((DefaultTableModel) jTable2.getModel()).getValueAt(i, 0).toString());
+            
+               
+
+        }
+    }//GEN-LAST:event_jTable2MouseClicked
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+
+        atualizarTabelaFornecedor();
+
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        jDialog1.setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField8ActionPerformed
+        String cnpjEmpresa = jTextField8.getText();
+
+        ((DefaultTableModel) jTable2.getModel()).setRowCount(0);
+
+        try {
+
+            if (cnpjEmpresa.isEmpty()) {
+                throw new Exception("Preencha o campo de CNPJ");
+            }
+            List<prefeitura.entities.Fornecedor> fornecedores = fornecedorController.findFornecedorEntities();
+            for (prefeitura.entities.Fornecedor fornecedor : fornecedores) {
+                if (cnpjEmpresa.equalsIgnoreCase(String.valueOf(fornecedor.getCnpj()))) {
+                    String linha[] = {
+                        String.valueOf(fornecedor.getIdFornecedor()),
+                        String.valueOf(fornecedor.getCnpj()),
+                        String.valueOf(fornecedor.getNomeEmpresa())
+
+                    };
+                    ((DefaultTableModel) jTable2.getModel()).addRow(linha);
+
+                }
+
+                jTextField8.setText(String.valueOf(fornecedor.getIdFornecedor()));
+
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+
+
+    }//GEN-LAST:event_jTextField8ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -369,11 +656,14 @@ public class Processo extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
@@ -382,8 +672,10 @@ public class Processo extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
@@ -391,5 +683,6 @@ public class Processo extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
     // End of variables declaration//GEN-END:variables
 }

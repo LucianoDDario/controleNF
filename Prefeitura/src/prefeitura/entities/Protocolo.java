@@ -57,6 +57,12 @@ public class Protocolo implements Serializable {
     public Protocolo() {
     }
 
+    public Protocolo(Integer idProtocolo, Integer numeroProtocolo, Date dataProtocolo) {
+        this.idProtocolo = idProtocolo;
+        this.numeroProtocolo = numeroProtocolo;
+        this.dataProtocolo = dataProtocolo;
+    }
+
     public Protocolo(Integer idProtocolo) {
         this.idProtocolo = idProtocolo;
     }
