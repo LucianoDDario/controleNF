@@ -36,6 +36,10 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Processo.findByDataSaidaCompras", query = "SELECT p FROM Processo p WHERE p.dataSaidaCompras = :dataSaidaCompras")})
 public class Processo implements Serializable {
 
+    @JoinColumn(name = "IdOficio", referencedColumnName = "IdOficio")
+    @ManyToOne
+    private Oficio idOficio;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +71,8 @@ public class Processo implements Serializable {
     public Processo() {
     }
 
-    public Processo(Integer idProcesso, Integer numeroProcesso, String tipoProcesso, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio numeroOficio) {
+    public Processo(Oficio idOficio, Integer idProcesso, Integer numeroProcesso, String tipoProcesso, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio numeroOficio) {
+        this.idOficio = idOficio;
         this.idProcesso = idProcesso;
         this.numeroProcesso = numeroProcesso;
         this.tipoProcesso = tipoProcesso;
@@ -75,6 +80,8 @@ public class Processo implements Serializable {
         this.idFornecedor = idFornecedor;
         this.numeroOficio = numeroOficio;
     }
+
+    
 
     public Processo(Integer idProcesso) {
         this.idProcesso = idProcesso;
@@ -183,6 +190,14 @@ public class Processo implements Serializable {
     @Override
     public String toString() {
         return "prefeitura.entities.Processo[ idProcesso=" + idProcesso + " ]";
+    }
+
+    public Oficio getIdOficio() {
+        return idOficio;
+    }
+
+    public void setIdOficio(Oficio idOficio) {
+        this.idOficio = idOficio;
     }
     
 }

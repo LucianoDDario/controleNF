@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
@@ -25,7 +26,6 @@ public class Processo extends javax.swing.JFrame {
 
     EntityManagerFactory factory;
     OficioJpaController oficioController;
-    SecretariaJpaController secretariaController;
     ProcessoJpaController processoController;
     FornecedorJpaController fornecedorController;
 
@@ -45,7 +45,7 @@ public class Processo extends javax.swing.JFrame {
         try {
             factory = Persistence.createEntityManagerFactory("PrefeituraFuncionandoPU");
             oficioController = new OficioJpaController(factory);
-            secretariaController = new SecretariaJpaController(factory);
+            new SecretariaJpaController(factory);
             processoController = new ProcessoJpaController(factory);
             fornecedorController = new FornecedorJpaController(factory);
         } catch (Exception e) {
@@ -66,8 +66,7 @@ public class Processo extends javax.swing.JFrame {
         jTextField5.setText("");
         jTextField6.setText("");
         jTextField7.setText("");
-//        atualizarTabela();
-//        atualizarCombo();
+        atualizarTabela();
         jButton3.setEnabled(true);
         jButton4.setEnabled(false);
         jButton6.setEnabled(true);
@@ -90,29 +89,26 @@ public class Processo extends javax.swing.JFrame {
 
         ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
         try {
-            List<prefeitura.entities.Oficio> oficios = oficioController.findOficioEntities();
-            
-                        
-            
+            List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
+
             SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-            for (prefeitura.entities.Oficio oficio : oficios) {
-                
-                List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
-                
-                
-                
-                    String dataFormatada = formato.format(oficio.getDataOficio());
-                    String linha[] = {
-                    String.valueOf(oficio.getIdOficio()),                    
-                    String.valueOf(oficio.getNumeroOficio()),
+            for (prefeitura.entities.Processo processo : processos) {
+                prefeitura.entities.Oficio oficio = processo.getIdOficio();
+
+                String dataFormatada = formato.format(processo.getDataSaidaCompras());
+                String linha[] = {
+                    String.valueOf(oficio.getIdOficio()),
+                    String.valueOf(processo.getNumeroOficio()),
+                    String.valueOf(processo.getNumeroProcesso()),
                     dataFormatada,
-                    String.valueOf(processos.),
+                    String.valueOf(processo.getTipoProcesso()),
                     String.valueOf(oficio.getIdSecretaria()),
-                    oficio.getDescricao()                    
+                    oficio.getDescricao(),
+                    String.valueOf(processo.getIdFornecedor())
                 };
                 ((DefaultTableModel) jTable1.getModel()).addRow(linha);
             }
-            
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
@@ -489,7 +485,6 @@ public class Processo extends javax.swing.JFrame {
         String numeroProcesso = jTextField2.getText();
         String tipo = (String) jComboBox1.getSelectedItem();
         String numeroProtocolo = jTextField4.getText();
-        
 
         SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -498,11 +493,13 @@ public class Processo extends javax.swing.JFrame {
                 throw new Exception("Preencha todos os campos");
             }
             prefeitura.entities.Fornecedor fornecedor = fornecedorController.findFornecedor(Integer.valueOf(jTextField7.getText()));
-            prefeitura.entities.Oficio oficio = oficioController.findOficio(Integer.valueOf(numeroProtocolo));
-            
-            
-            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(null, Integer.valueOf(numeroProcesso), tipo, formato.parse(dataStr), fornecedor, oficio);
+            prefeitura.entities.Oficio protOficio = oficioController.findOficio(Integer.valueOf(numeroProtocolo));
+            prefeitura.entities.Oficio idOficio = oficioController.findOficio(Integer.valueOf(jTextField4.getText()));
+
+            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(idOficio, null, Integer.valueOf(numeroProcesso), tipo, formato.parse(dataStr), fornecedor, protOficio);
+
             processoController.create(processo);
+            limpar();
             atualizarTabela();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -565,8 +562,7 @@ public class Processo extends javax.swing.JFrame {
         if (evt.getClickCount() == 2) {
             int i = jTable2.getSelectedRow();
             jTextField7.setText(((DefaultTableModel) jTable2.getModel()).getValueAt(i, 0).toString());
-            
-               
+            jDialog1.setVisible(false);
 
         }
     }//GEN-LAST:event_jTable2MouseClicked
@@ -685,4 +681,18 @@ public class Processo extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jTextField8;
     // End of variables declaration//GEN-END:variables
+
+    public void persist(Object object) {
+        EntityManager em = factory.createEntityManager();
+        em.getTransaction().begin();
+        try {
+            em.persist(object);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            em.getTransaction().rollback();
+        } finally {
+            em.close();
+        }
+    }
 }
