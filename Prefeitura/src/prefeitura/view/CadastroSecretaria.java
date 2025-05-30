@@ -208,7 +208,7 @@ public class CadastroSecretaria extends javax.swing.JFrame {
             if(nomeSecretaria.isEmpty()){
                 throw new Exception("Preencha todos os campos");
             }
-            Secretaria secretaria = new Secretaria(null, nomeSecretaria);
+            Secretaria secretaria = new Secretaria(nomeSecretaria);
             secretariaController.create(secretaria);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,

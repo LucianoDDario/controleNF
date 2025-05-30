@@ -5,6 +5,7 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -33,12 +34,16 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Processo.findByIdProcesso", query = "SELECT p FROM Processo p WHERE p.idProcesso = :idProcesso"),
     @NamedQuery(name = "Processo.findByNumeroProcesso", query = "SELECT p FROM Processo p WHERE p.numeroProcesso = :numeroProcesso"),
     @NamedQuery(name = "Processo.findByTipoProcesso", query = "SELECT p FROM Processo p WHERE p.tipoProcesso = :tipoProcesso"),
+    @NamedQuery(name = "Processo.findByNumeroOficio", query = "SELECT p FROM Processo p WHERE p.numeroOficio = :numeroOficio"),
     @NamedQuery(name = "Processo.findByDataSaidaCompras", query = "SELECT p FROM Processo p WHERE p.dataSaidaCompras = :dataSaidaCompras")})
 public class Processo implements Serializable {
 
-    @JoinColumn(name = "IdOficio", referencedColumnName = "IdOficio")
+    @OneToMany(mappedBy = "idProcesso")
+    private Collection<Protocolo> protocoloCollection;
+
+    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
     @ManyToOne
-    private Oficio idOficio;
+    private Protocolo idProtocolo;
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -46,45 +51,37 @@ public class Processo implements Serializable {
     @Basic(optional = false)
     @Column(name = "IdProcesso")
     private Integer idProcesso;
+    @Basic(optional = false)
     @Column(name = "NumeroProcesso")
-    private Integer numeroProcesso;
+    private int numeroProcesso;
     @Column(name = "TipoProcesso")
     private String tipoProcesso;
+    @Column(name = "NumeroOficio")
+    private Integer numeroOficio;
     @Column(name = "DataSaidaCompras")
     @Temporal(TemporalType.DATE)
     private Date dataSaidaCompras;
-    @OneToMany(mappedBy = "numeroProcesso")
-    private List<Possui> possuiList;
+    @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
+    @ManyToOne
+    private Fornecedor idFornecedor;
+    @JoinColumn(name = "IdOficio", referencedColumnName = "IdOficio")
+    @ManyToOne
+    private Oficio idOficio;
     @OneToMany(mappedBy = "idProcesso")
     private List<Notafiscal> notafiscalList;
     @OneToMany(mappedBy = "numeroProcesso")
     private List<Cria> criaList;
-    @OneToMany(mappedBy = "numeroProcesso")
-    private List<Possui1> possui1List;
-    @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
-    @ManyToOne
-    private Fornecedor idFornecedor;
-    @JoinColumn(name = "NumeroOficio", referencedColumnName = "NumeroOficio")
-    @ManyToOne
-    private Oficio numeroOficio;
 
     public Processo() {
     }
 
-    public Processo(Oficio idOficio, Integer idProcesso, Integer numeroProcesso, String tipoProcesso, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio numeroOficio) {
-        this.idOficio = idOficio;
-        this.idProcesso = idProcesso;
-        this.numeroProcesso = numeroProcesso;
-        this.tipoProcesso = tipoProcesso;
-        this.dataSaidaCompras = dataSaidaCompras;
-        this.idFornecedor = idFornecedor;
-        this.numeroOficio = numeroOficio;
-    }
-
-    
-
     public Processo(Integer idProcesso) {
         this.idProcesso = idProcesso;
+    }
+
+    public Processo(Integer idProcesso, int numeroProcesso) {
+        this.idProcesso = idProcesso;
+        this.numeroProcesso = numeroProcesso;
     }
 
     public Integer getIdProcesso() {
@@ -95,11 +92,11 @@ public class Processo implements Serializable {
         this.idProcesso = idProcesso;
     }
 
-    public Integer getNumeroProcesso() {
+    public int getNumeroProcesso() {
         return numeroProcesso;
     }
 
-    public void setNumeroProcesso(Integer numeroProcesso) {
+    public void setNumeroProcesso(int numeroProcesso) {
         this.numeroProcesso = numeroProcesso;
     }
 
@@ -111,6 +108,14 @@ public class Processo implements Serializable {
         this.tipoProcesso = tipoProcesso;
     }
 
+    public Integer getNumeroOficio() {
+        return numeroOficio;
+    }
+
+    public void setNumeroOficio(Integer numeroOficio) {
+        this.numeroOficio = numeroOficio;
+    }
+
     public Date getDataSaidaCompras() {
         return dataSaidaCompras;
     }
@@ -119,12 +124,20 @@ public class Processo implements Serializable {
         this.dataSaidaCompras = dataSaidaCompras;
     }
 
-    public List<Possui> getPossuiList() {
-        return possuiList;
+    public Fornecedor getIdFornecedor() {
+        return idFornecedor;
     }
 
-    public void setPossuiList(List<Possui> possuiList) {
-        this.possuiList = possuiList;
+    public void setIdFornecedor(Fornecedor idFornecedor) {
+        this.idFornecedor = idFornecedor;
+    }
+
+    public Oficio getIdOficio() {
+        return idOficio;
+    }
+
+    public void setIdOficio(Oficio idOficio) {
+        this.idOficio = idOficio;
     }
 
     public List<Notafiscal> getNotafiscalList() {
@@ -141,30 +154,6 @@ public class Processo implements Serializable {
 
     public void setCriaList(List<Cria> criaList) {
         this.criaList = criaList;
-    }
-
-    public List<Possui1> getPossui1List() {
-        return possui1List;
-    }
-
-    public void setPossui1List(List<Possui1> possui1List) {
-        this.possui1List = possui1List;
-    }
-
-    public Fornecedor getIdFornecedor() {
-        return idFornecedor;
-    }
-
-    public void setIdFornecedor(Fornecedor idFornecedor) {
-        this.idFornecedor = idFornecedor;
-    }
-
-    public Oficio getNumeroOficio() {
-        return numeroOficio;
-    }
-
-    public void setNumeroOficio(Oficio numeroOficio) {
-        this.numeroOficio = numeroOficio;
     }
 
     @Override
@@ -192,12 +181,20 @@ public class Processo implements Serializable {
         return "prefeitura.entities.Processo[ idProcesso=" + idProcesso + " ]";
     }
 
-    public Oficio getIdOficio() {
-        return idOficio;
+    public Protocolo getIdProtocolo() {
+        return idProtocolo;
     }
 
-    public void setIdOficio(Oficio idOficio) {
-        this.idOficio = idOficio;
+    public void setIdProtocolo(Protocolo idProtocolo) {
+        this.idProtocolo = idProtocolo;
+    }
+
+    public Collection<Protocolo> getProtocoloCollection() {
+        return protocoloCollection;
+    }
+
+    public void setProtocoloCollection(Collection<Protocolo> protocoloCollection) {
+        this.protocoloCollection = protocoloCollection;
     }
     
 }

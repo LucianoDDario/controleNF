@@ -5,18 +5,16 @@
 package prefeitura.controllers;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import prefeitura.entities.Usuario;
-import prefeitura.entities.Monitora;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
 import prefeitura.entities.Logsistema;
+import prefeitura.entities.Usuario;
 
 /**
  *
@@ -34,9 +32,6 @@ public class LogsistemaJpaController implements Serializable {
     }
 
     public void create(Logsistema logsistema) {
-        if (logsistema.getMonitoraList() == null) {
-            logsistema.setMonitoraList(new ArrayList<Monitora>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -46,25 +41,10 @@ public class LogsistemaJpaController implements Serializable {
                 idUsuario = em.getReference(idUsuario.getClass(), idUsuario.getIdUsuario());
                 logsistema.setIdUsuario(idUsuario);
             }
-            List<Monitora> attachedMonitoraList = new ArrayList<Monitora>();
-            for (Monitora monitoraListMonitoraToAttach : logsistema.getMonitoraList()) {
-                monitoraListMonitoraToAttach = em.getReference(monitoraListMonitoraToAttach.getClass(), monitoraListMonitoraToAttach.getIdMonitora());
-                attachedMonitoraList.add(monitoraListMonitoraToAttach);
-            }
-            logsistema.setMonitoraList(attachedMonitoraList);
             em.persist(logsistema);
             if (idUsuario != null) {
                 idUsuario.getLogsistemaList().add(logsistema);
                 idUsuario = em.merge(idUsuario);
-            }
-            for (Monitora monitoraListMonitora : logsistema.getMonitoraList()) {
-                Logsistema oldIdLogOfMonitoraListMonitora = monitoraListMonitora.getIdLog();
-                monitoraListMonitora.setIdLog(logsistema);
-                monitoraListMonitora = em.merge(monitoraListMonitora);
-                if (oldIdLogOfMonitoraListMonitora != null) {
-                    oldIdLogOfMonitoraListMonitora.getMonitoraList().remove(monitoraListMonitora);
-                    oldIdLogOfMonitoraListMonitora = em.merge(oldIdLogOfMonitoraListMonitora);
-                }
             }
             em.getTransaction().commit();
         } finally {
@@ -82,19 +62,10 @@ public class LogsistemaJpaController implements Serializable {
             Logsistema persistentLogsistema = em.find(Logsistema.class, logsistema.getIdLog());
             Usuario idUsuarioOld = persistentLogsistema.getIdUsuario();
             Usuario idUsuarioNew = logsistema.getIdUsuario();
-            List<Monitora> monitoraListOld = persistentLogsistema.getMonitoraList();
-            List<Monitora> monitoraListNew = logsistema.getMonitoraList();
             if (idUsuarioNew != null) {
                 idUsuarioNew = em.getReference(idUsuarioNew.getClass(), idUsuarioNew.getIdUsuario());
                 logsistema.setIdUsuario(idUsuarioNew);
             }
-            List<Monitora> attachedMonitoraListNew = new ArrayList<Monitora>();
-            for (Monitora monitoraListNewMonitoraToAttach : monitoraListNew) {
-                monitoraListNewMonitoraToAttach = em.getReference(monitoraListNewMonitoraToAttach.getClass(), monitoraListNewMonitoraToAttach.getIdMonitora());
-                attachedMonitoraListNew.add(monitoraListNewMonitoraToAttach);
-            }
-            monitoraListNew = attachedMonitoraListNew;
-            logsistema.setMonitoraList(monitoraListNew);
             logsistema = em.merge(logsistema);
             if (idUsuarioOld != null && !idUsuarioOld.equals(idUsuarioNew)) {
                 idUsuarioOld.getLogsistemaList().remove(logsistema);
@@ -103,23 +74,6 @@ public class LogsistemaJpaController implements Serializable {
             if (idUsuarioNew != null && !idUsuarioNew.equals(idUsuarioOld)) {
                 idUsuarioNew.getLogsistemaList().add(logsistema);
                 idUsuarioNew = em.merge(idUsuarioNew);
-            }
-            for (Monitora monitoraListOldMonitora : monitoraListOld) {
-                if (!monitoraListNew.contains(monitoraListOldMonitora)) {
-                    monitoraListOldMonitora.setIdLog(null);
-                    monitoraListOldMonitora = em.merge(monitoraListOldMonitora);
-                }
-            }
-            for (Monitora monitoraListNewMonitora : monitoraListNew) {
-                if (!monitoraListOld.contains(monitoraListNewMonitora)) {
-                    Logsistema oldIdLogOfMonitoraListNewMonitora = monitoraListNewMonitora.getIdLog();
-                    monitoraListNewMonitora.setIdLog(logsistema);
-                    monitoraListNewMonitora = em.merge(monitoraListNewMonitora);
-                    if (oldIdLogOfMonitoraListNewMonitora != null && !oldIdLogOfMonitoraListNewMonitora.equals(logsistema)) {
-                        oldIdLogOfMonitoraListNewMonitora.getMonitoraList().remove(monitoraListNewMonitora);
-                        oldIdLogOfMonitoraListNewMonitora = em.merge(oldIdLogOfMonitoraListNewMonitora);
-                    }
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -154,11 +108,6 @@ public class LogsistemaJpaController implements Serializable {
             if (idUsuario != null) {
                 idUsuario.getLogsistemaList().remove(logsistema);
                 idUsuario = em.merge(idUsuario);
-            }
-            List<Monitora> monitoraList = logsistema.getMonitoraList();
-            for (Monitora monitoraListMonitora : monitoraList) {
-                monitoraListMonitora.setIdLog(null);
-                monitoraListMonitora = em.merge(monitoraListMonitora);
             }
             em.remove(logsistema);
             em.getTransaction().commit();

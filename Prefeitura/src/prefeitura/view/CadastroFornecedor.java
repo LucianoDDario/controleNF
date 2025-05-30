@@ -13,6 +13,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.MaskFormatter;
 import org.json.JSONObject;
 import prefeitura.controllers.*;
 
@@ -25,6 +27,7 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         initComponents();
         abrirConexao();
         atualizarTabela();
+        formatarCampo();
     }
 
     private void abrirConexao() {
@@ -40,22 +43,22 @@ public class CadastroFornecedor extends javax.swing.JFrame {
 
         }
     }
-    
-    private void atualizarTabela(){
+
+    private void atualizarTabela() {
         ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
-        try{
+        try {
             List<prefeitura.entities.Fornecedor> fornecedores = fornecedorController.findFornecedorEntities();
-            for(prefeitura.entities.Fornecedor fornecedor: fornecedores){
+            for (prefeitura.entities.Fornecedor fornecedor : fornecedores) {
                 String linha[] = {
                     String.valueOf(fornecedor.getIdFornecedor()),
                     String.valueOf(fornecedor.getCnpj()),
                     String.valueOf(fornecedor.getNomeEmpresa())
-                    
+
                 };
                 ((DefaultTableModel) jTable1.getModel()).addRow(linha);
             }
-            
-        }catch (Exception e) {
+
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
                     "ERRO",
@@ -63,14 +66,18 @@ public class CadastroFornecedor extends javax.swing.JFrame {
 
         }
     }
-    
-    private void buscaCNPJ(){
-        String cnpj = jTextField1.getText().trim();
+
+    private void buscaCNPJ() {
+        String cnpj = jFormattedTextField1.getText().trim();
         String url = "https://api.cnpjs.dev/v1/";
+        cnpj = removerMascara(cnpj);
         String urlFinal = url + cnpj.trim();
+        
+        
+        
 
         try {
-            URI uri = new URI(urlFinal); // Garante que a URL seja válida
+            URI uri = new URI(urlFinal);
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
@@ -84,6 +91,7 @@ public class CadastroFornecedor extends javax.swing.JFrame {
             String nomeEmpresa = jsonObject.getString("razao_social");
 
             jTextField3.setText(nomeEmpresa);
+            
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
@@ -92,15 +100,36 @@ public class CadastroFornecedor extends javax.swing.JFrame {
 
         }
     }
-    
-    private void limpar(){
-        jTextField1.setText("");
+
+    private void limpar() {
+        jFormattedTextField1.setText("");
         jTextField2.setText("");
         jTextField3.setText("");
         jButton3.setEnabled(true);
         jButton4.setEnabled(false);
-        
+        formatarCampo();
+
     }
+
+    private void formatarCampo() {
+        try {
+            MaskFormatter formatter = new MaskFormatter("##.###.###/####-##");
+            formatter.setPlaceholderCharacter('_');
+            jFormattedTextField1.setFormatterFactory(new DefaultFormatterFactory(formatter));
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private String removerMascara(String cnpj) {
+        return cnpj.replaceAll("[^0-9]", "");
+    }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -114,7 +143,6 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jButton4 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
-        jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
@@ -122,6 +150,7 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jTextField3 = new javax.swing.JTextField();
+        jFormattedTextField1 = new javax.swing.JFormattedTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -136,12 +165,6 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         });
 
         jButton1.setText("Secretaria");
-
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
 
         jLabel1.setText("CNPJ");
 
@@ -194,6 +217,12 @@ public class CadastroFornecedor extends javax.swing.JFrame {
 
         jTextField3.setEditable(false);
 
+        jFormattedTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jFormattedTextField1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -213,9 +242,9 @@ public class CadastroFornecedor extends javax.swing.JFrame {
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(78, 78, 78)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
+                            .addComponent(jFormattedTextField1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -235,8 +264,8 @@ public class CadastroFornecedor extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1)
-                    .addComponent(jButton4))
+                    .addComponent(jButton4)
+                    .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -249,24 +278,20 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        buscaCNPJ();
-    }//GEN-LAST:event_jTextField1ActionPerformed
-
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        
+
         buscaCNPJ();
-        
-        String CNPJ = jTextField1.getText();
+
+        String CNPJ = jFormattedTextField1.getText();
         String nomeEmpresa = jTextField3.getText();
 
         try {
             if (CNPJ.isEmpty() || nomeEmpresa.isEmpty()) {
                 throw new Exception("Preencha todos os campos");
             }
-            prefeitura.entities.Fornecedor fornecedor = new prefeitura.entities.Fornecedor(null,nomeEmpresa, CNPJ);
+            prefeitura.entities.Fornecedor fornecedor = new prefeitura.entities.Fornecedor(nomeEmpresa, CNPJ);
             fornecedorController.create(fornecedor);
-        }catch (Exception e) {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
                     "ERRO",
@@ -278,29 +303,29 @@ public class CadastroFornecedor extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        if(evt.getClickCount() == 2){
-           int i = jTable1.getSelectedRow();
+        if (evt.getClickCount() == 2) {
+            int i = jTable1.getSelectedRow();
             jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
-            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
-            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());          
+            jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
+            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
             jButton4.setEnabled(true);
             jButton3.setEnabled(false);
-       
-    }
+
+        }
     }//GEN-LAST:event_jTable1MouseClicked
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         Integer IdFornecedor = Integer.valueOf(jTextField2.getText());
-        try{
-                if(JOptionPane.showConfirmDialog(this,"Remover o fornecedor " + jTextField3.getText() + " ?") == JOptionPane.OK_OPTION){
-                    fornecedorController.destroy(IdFornecedor);
-                    JOptionPane.showConfirmDialog(this,
-                            "Fornecedor " + jTextField3.getText() + " removido com sucesso",
-                            "SUCESSO",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
-                limpar();
-            }catch (Exception e) {
+        try {
+            if (JOptionPane.showConfirmDialog(this, "Remover o fornecedor " + jTextField3.getText() + " ?") == JOptionPane.OK_OPTION) {
+                fornecedorController.destroy(IdFornecedor);
+                JOptionPane.showConfirmDialog(this,
+                        "Fornecedor " + jTextField3.getText() + " removido com sucesso",
+                        "SUCESSO",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+            limpar();
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
                     "ERRO",
@@ -309,6 +334,11 @@ public class CadastroFornecedor extends javax.swing.JFrame {
         }
         atualizarTabela();
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
+
+        buscaCNPJ();
+    }//GEN-LAST:event_jFormattedTextField1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -349,12 +379,12 @@ public class CadastroFornecedor extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     // End of variables declaration//GEN-END:variables

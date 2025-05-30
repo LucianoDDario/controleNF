@@ -5,6 +5,7 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -18,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,36 +37,58 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Protocolo.findByDataProtocolo", query = "SELECT p FROM Protocolo p WHERE p.dataProtocolo = :dataProtocolo")})
 public class Protocolo implements Serializable {
 
+    @JoinColumn(name = "IdOficio", referencedColumnName = "IdOficio")
+    @ManyToOne
+    private Oficio idOficio;
+    @JoinColumn(name = "IdProcesso", referencedColumnName = "IdProcesso")
+    @ManyToOne
+    private Processo idProcesso;
+    @OneToOne(mappedBy = "idProtocolo")
+    private Oficio oficio;
+
+    @OneToMany(mappedBy = "idProtocolo")
+    private Collection<Processo> processoCollection;
+    @OneToMany(mappedBy = "idProtocolo")
+    private Collection<Oficio> oficioCollection;
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "IdProtocolo")
     private Integer idProtocolo;
+    @Basic(optional = false)
     @Column(name = "NumeroProtocolo")
-    private Integer numeroProtocolo;
+    private int numeroProtocolo;
     @Column(name = "DataProtocolo")
     @Temporal(TemporalType.DATE)
     private Date dataProtocolo;
-    @OneToMany(mappedBy = "numeroProtocolo")
-    private List<Possui> possuiList;
-    @OneToMany(mappedBy = "idProtocolo")
-    private List<Notafiscal> notafiscalList;
     @JoinColumn(name = "NumeroNota", referencedColumnName = "NumeroNota")
     @ManyToOne
     private Notafiscal numeroNota;
+    @OneToMany(mappedBy = "idProtocolo")
+    private List<Notafiscal> notafiscalList;
 
     public Protocolo() {
     }
 
-    public Protocolo(Integer idProtocolo, Integer numeroProtocolo, Date dataProtocolo) {
-        this.idProtocolo = idProtocolo;
+    public Protocolo(Oficio idOficio, Processo idProcesso) {
+        this.idOficio = idOficio;
+        this.idProcesso = idProcesso;
+    }
+
+    public Protocolo(int numeroProtocolo, Date dataProtocolo) {
         this.numeroProtocolo = numeroProtocolo;
         this.dataProtocolo = dataProtocolo;
     }
 
     public Protocolo(Integer idProtocolo) {
         this.idProtocolo = idProtocolo;
+    }
+
+    public Protocolo(Integer idProtocolo, int numeroProtocolo) {
+        this.idProtocolo = idProtocolo;
+        this.numeroProtocolo = numeroProtocolo;
     }
 
     public Integer getIdProtocolo() {
@@ -75,11 +99,11 @@ public class Protocolo implements Serializable {
         this.idProtocolo = idProtocolo;
     }
 
-    public Integer getNumeroProtocolo() {
+    public int getNumeroProtocolo() {
         return numeroProtocolo;
     }
 
-    public void setNumeroProtocolo(Integer numeroProtocolo) {
+    public void setNumeroProtocolo(int numeroProtocolo) {
         this.numeroProtocolo = numeroProtocolo;
     }
 
@@ -91,12 +115,12 @@ public class Protocolo implements Serializable {
         this.dataProtocolo = dataProtocolo;
     }
 
-    public List<Possui> getPossuiList() {
-        return possuiList;
+    public Notafiscal getNumeroNota() {
+        return numeroNota;
     }
 
-    public void setPossuiList(List<Possui> possuiList) {
-        this.possuiList = possuiList;
+    public void setNumeroNota(Notafiscal numeroNota) {
+        this.numeroNota = numeroNota;
     }
 
     public List<Notafiscal> getNotafiscalList() {
@@ -105,14 +129,6 @@ public class Protocolo implements Serializable {
 
     public void setNotafiscalList(List<Notafiscal> notafiscalList) {
         this.notafiscalList = notafiscalList;
-    }
-
-    public Notafiscal getNumeroNota() {
-        return numeroNota;
-    }
-
-    public void setNumeroNota(Notafiscal numeroNota) {
-        this.numeroNota = numeroNota;
     }
 
     @Override
@@ -137,7 +153,47 @@ public class Protocolo implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Protocolo[ idProtocolo=" + idProtocolo + " ]";
+        return String.valueOf(idProtocolo);
+    }
+
+    public Collection<Processo> getProcessoCollection() {
+        return processoCollection;
+    }
+
+    public void setProcessoCollection(Collection<Processo> processoCollection) {
+        this.processoCollection = processoCollection;
+    }
+
+    public Collection<Oficio> getOficioCollection() {
+        return oficioCollection;
+    }
+
+    public void setOficioCollection(Collection<Oficio> oficioCollection) {
+        this.oficioCollection = oficioCollection;
+    }
+
+    public Oficio getIdOficio() {
+        return idOficio;
+    }
+
+    public void setIdOficio(Oficio idOficio) {
+        this.idOficio = idOficio;
+    }
+
+    public Processo getIdProcesso() {
+        return idProcesso;
+    }
+
+    public void setIdProcesso(Processo idProcesso) {
+        this.idProcesso = idProcesso;
+    }
+
+    public Oficio getOficio() {
+        return oficio;
+    }
+
+    public void setOficio(Oficio oficio) {
+        this.oficio = oficio;
     }
     
 }

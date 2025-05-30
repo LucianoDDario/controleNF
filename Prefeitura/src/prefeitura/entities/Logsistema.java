@@ -6,7 +6,6 @@ package prefeitura.entities;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,7 +16,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,8 +48,6 @@ public class Logsistema implements Serializable {
     @Column(name = "HoraAcao")
     @Temporal(TemporalType.TIME)
     private Date horaAcao;
-    @OneToMany(mappedBy = "idLog")
-    private List<Monitora> monitoraList;
     @JoinColumn(name = "IdUsuario", referencedColumnName = "IdUsuario")
     @ManyToOne
     private Usuario idUsuario;
@@ -93,14 +89,6 @@ public class Logsistema implements Serializable {
 
     public void setHoraAcao(Date horaAcao) {
         this.horaAcao = horaAcao;
-    }
-
-    public List<Monitora> getMonitoraList() {
-        return monitoraList;
-    }
-
-    public void setMonitoraList(List<Monitora> monitoraList) {
-        this.monitoraList = monitoraList;
     }
 
     public Usuario getIdUsuario() {

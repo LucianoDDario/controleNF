@@ -38,28 +38,31 @@ public class Fornecedor implements Serializable {
     private Integer idFornecedor;
     @Column(name = "NomeEmpresa")
     private String nomeEmpresa;
+    @Basic(optional = false)
     @Column(name = "CNPJ")
     private String cnpj;
     @OneToMany(mappedBy = "idFornecedor")
     private List<Envia> enviaList;
     @OneToMany(mappedBy = "idFornecedor")
-    private List<Notafiscal> notafiscalList;
-    @OneToMany(mappedBy = "idFornecedor")
     private List<Processo> processoList;
-    
-    
+    @OneToMany(mappedBy = "idFornecedor")
+    private List<Notafiscal> notafiscalList;
 
     public Fornecedor() {
     }
 
-    public Fornecedor(Integer idFornecedor, String nomeEmpresa, String cnpj) {
-        this.idFornecedor = idFornecedor;
+    public Fornecedor(String nomeEmpresa, String cnpj) {
         this.nomeEmpresa = nomeEmpresa;
         this.cnpj = cnpj;
     }
 
     public Fornecedor(Integer idFornecedor) {
         this.idFornecedor = idFornecedor;
+    }
+
+    public Fornecedor(Integer idFornecedor, String cnpj) {
+        this.idFornecedor = idFornecedor;
+        this.cnpj = cnpj;
     }
 
     public Integer getIdFornecedor() {
@@ -94,20 +97,20 @@ public class Fornecedor implements Serializable {
         this.enviaList = enviaList;
     }
 
-    public List<Notafiscal> getNotafiscalList() {
-        return notafiscalList;
-    }
-
-    public void setNotafiscalList(List<Notafiscal> notafiscalList) {
-        this.notafiscalList = notafiscalList;
-    }
-
     public List<Processo> getProcessoList() {
         return processoList;
     }
 
     public void setProcessoList(List<Processo> processoList) {
         this.processoList = processoList;
+    }
+
+    public List<Notafiscal> getNotafiscalList() {
+        return notafiscalList;
+    }
+
+    public void setNotafiscalList(List<Notafiscal> notafiscalList) {
+        this.notafiscalList = notafiscalList;
     }
 
     @Override
@@ -132,7 +135,7 @@ public class Fornecedor implements Serializable {
 
     @Override
     public String toString() {
-        return String.valueOf(idFornecedor);
+        return "prefeitura.entities.Fornecedor[ idFornecedor=" + idFornecedor + " ]";
     }
     
 }

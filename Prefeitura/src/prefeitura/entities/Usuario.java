@@ -37,26 +37,30 @@ public class Usuario implements Serializable {
     @Basic(optional = false)
     @Column(name = "IdUsuario")
     private Integer idUsuario;
+    @Basic(optional = false)
     @Column(name = "Login")
     private String login;
+    @Basic(optional = false)
     @Column(name = "Senha")
     private String senha;
     @Column(name = "TipoAcesso")
     private String tipoAcesso;
     @OneToMany(mappedBy = "idUsuario")
-    private List<Monitora> monitoraList;
-    @OneToMany(mappedBy = "idUsuario")
     private List<Cria> criaList;
     @OneToMany(mappedBy = "idUsuario")
     private List<Logsistema> logsistemaList;
-    @OneToMany(mappedBy = "idUsuario")
-    private List<Recebe> recebeList;
 
     public Usuario() {
     }
 
     public Usuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
+    }
+
+    public Usuario(Integer idUsuario, String login, String senha) {
+        this.idUsuario = idUsuario;
+        this.login = login;
+        this.senha = senha;
     }
 
     public Integer getIdUsuario() {
@@ -91,14 +95,6 @@ public class Usuario implements Serializable {
         this.tipoAcesso = tipoAcesso;
     }
 
-    public List<Monitora> getMonitoraList() {
-        return monitoraList;
-    }
-
-    public void setMonitoraList(List<Monitora> monitoraList) {
-        this.monitoraList = monitoraList;
-    }
-
     public List<Cria> getCriaList() {
         return criaList;
     }
@@ -113,14 +109,6 @@ public class Usuario implements Serializable {
 
     public void setLogsistemaList(List<Logsistema> logsistemaList) {
         this.logsistemaList = logsistemaList;
-    }
-
-    public List<Recebe> getRecebeList() {
-        return recebeList;
-    }
-
-    public void setRecebeList(List<Recebe> recebeList) {
-        this.recebeList = recebeList;
     }
 
     @Override

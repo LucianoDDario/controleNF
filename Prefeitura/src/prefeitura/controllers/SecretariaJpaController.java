@@ -15,7 +15,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
-import prefeitura.entities.Envia1;
 import prefeitura.entities.Secretaria;
 
 /**
@@ -37,9 +36,6 @@ public class SecretariaJpaController implements Serializable {
         if (secretaria.getOficioList() == null) {
             secretaria.setOficioList(new ArrayList<Oficio>());
         }
-        if (secretaria.getEnvia1List() == null) {
-            secretaria.setEnvia1List(new ArrayList<Envia1>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -50,12 +46,6 @@ public class SecretariaJpaController implements Serializable {
                 attachedOficioList.add(oficioListOficioToAttach);
             }
             secretaria.setOficioList(attachedOficioList);
-            List<Envia1> attachedEnvia1List = new ArrayList<Envia1>();
-            for (Envia1 envia1ListEnvia1ToAttach : secretaria.getEnvia1List()) {
-                envia1ListEnvia1ToAttach = em.getReference(envia1ListEnvia1ToAttach.getClass(), envia1ListEnvia1ToAttach.getIdEnvia1());
-                attachedEnvia1List.add(envia1ListEnvia1ToAttach);
-            }
-            secretaria.setEnvia1List(attachedEnvia1List);
             em.persist(secretaria);
             for (Oficio oficioListOficio : secretaria.getOficioList()) {
                 Secretaria oldIdSecretariaOfOficioListOficio = oficioListOficio.getIdSecretaria();
@@ -64,15 +54,6 @@ public class SecretariaJpaController implements Serializable {
                 if (oldIdSecretariaOfOficioListOficio != null) {
                     oldIdSecretariaOfOficioListOficio.getOficioList().remove(oficioListOficio);
                     oldIdSecretariaOfOficioListOficio = em.merge(oldIdSecretariaOfOficioListOficio);
-                }
-            }
-            for (Envia1 envia1ListEnvia1 : secretaria.getEnvia1List()) {
-                Secretaria oldIdSecretariaOfEnvia1ListEnvia1 = envia1ListEnvia1.getIdSecretaria();
-                envia1ListEnvia1.setIdSecretaria(secretaria);
-                envia1ListEnvia1 = em.merge(envia1ListEnvia1);
-                if (oldIdSecretariaOfEnvia1ListEnvia1 != null) {
-                    oldIdSecretariaOfEnvia1ListEnvia1.getEnvia1List().remove(envia1ListEnvia1);
-                    oldIdSecretariaOfEnvia1ListEnvia1 = em.merge(oldIdSecretariaOfEnvia1ListEnvia1);
                 }
             }
             em.getTransaction().commit();
@@ -91,8 +72,6 @@ public class SecretariaJpaController implements Serializable {
             Secretaria persistentSecretaria = em.find(Secretaria.class, secretaria.getIdSecretaria());
             List<Oficio> oficioListOld = persistentSecretaria.getOficioList();
             List<Oficio> oficioListNew = secretaria.getOficioList();
-            List<Envia1> envia1ListOld = persistentSecretaria.getEnvia1List();
-            List<Envia1> envia1ListNew = secretaria.getEnvia1List();
             List<Oficio> attachedOficioListNew = new ArrayList<Oficio>();
             for (Oficio oficioListNewOficioToAttach : oficioListNew) {
                 oficioListNewOficioToAttach = em.getReference(oficioListNewOficioToAttach.getClass(), oficioListNewOficioToAttach.getIdOficio());
@@ -100,13 +79,6 @@ public class SecretariaJpaController implements Serializable {
             }
             oficioListNew = attachedOficioListNew;
             secretaria.setOficioList(oficioListNew);
-            List<Envia1> attachedEnvia1ListNew = new ArrayList<Envia1>();
-            for (Envia1 envia1ListNewEnvia1ToAttach : envia1ListNew) {
-                envia1ListNewEnvia1ToAttach = em.getReference(envia1ListNewEnvia1ToAttach.getClass(), envia1ListNewEnvia1ToAttach.getIdEnvia1());
-                attachedEnvia1ListNew.add(envia1ListNewEnvia1ToAttach);
-            }
-            envia1ListNew = attachedEnvia1ListNew;
-            secretaria.setEnvia1List(envia1ListNew);
             secretaria = em.merge(secretaria);
             for (Oficio oficioListOldOficio : oficioListOld) {
                 if (!oficioListNew.contains(oficioListOldOficio)) {
@@ -122,23 +94,6 @@ public class SecretariaJpaController implements Serializable {
                     if (oldIdSecretariaOfOficioListNewOficio != null && !oldIdSecretariaOfOficioListNewOficio.equals(secretaria)) {
                         oldIdSecretariaOfOficioListNewOficio.getOficioList().remove(oficioListNewOficio);
                         oldIdSecretariaOfOficioListNewOficio = em.merge(oldIdSecretariaOfOficioListNewOficio);
-                    }
-                }
-            }
-            for (Envia1 envia1ListOldEnvia1 : envia1ListOld) {
-                if (!envia1ListNew.contains(envia1ListOldEnvia1)) {
-                    envia1ListOldEnvia1.setIdSecretaria(null);
-                    envia1ListOldEnvia1 = em.merge(envia1ListOldEnvia1);
-                }
-            }
-            for (Envia1 envia1ListNewEnvia1 : envia1ListNew) {
-                if (!envia1ListOld.contains(envia1ListNewEnvia1)) {
-                    Secretaria oldIdSecretariaOfEnvia1ListNewEnvia1 = envia1ListNewEnvia1.getIdSecretaria();
-                    envia1ListNewEnvia1.setIdSecretaria(secretaria);
-                    envia1ListNewEnvia1 = em.merge(envia1ListNewEnvia1);
-                    if (oldIdSecretariaOfEnvia1ListNewEnvia1 != null && !oldIdSecretariaOfEnvia1ListNewEnvia1.equals(secretaria)) {
-                        oldIdSecretariaOfEnvia1ListNewEnvia1.getEnvia1List().remove(envia1ListNewEnvia1);
-                        oldIdSecretariaOfEnvia1ListNewEnvia1 = em.merge(oldIdSecretariaOfEnvia1ListNewEnvia1);
                     }
                 }
             }
@@ -175,11 +130,6 @@ public class SecretariaJpaController implements Serializable {
             for (Oficio oficioListOficio : oficioList) {
                 oficioListOficio.setIdSecretaria(null);
                 oficioListOficio = em.merge(oficioListOficio);
-            }
-            List<Envia1> envia1List = secretaria.getEnvia1List();
-            for (Envia1 envia1ListEnvia1 : envia1List) {
-                envia1ListEnvia1.setIdSecretaria(null);
-                envia1ListEnvia1 = em.merge(envia1ListEnvia1);
             }
             em.remove(secretaria);
             em.getTransaction().commit();

@@ -5,6 +5,7 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -47,10 +48,11 @@ public class Notafiscal implements Serializable {
     @Column(name = "DataEmissao")
     @Temporal(TemporalType.DATE)
     private Date dataEmissao;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "ValorNota")
-    private Integer valorNota;
+    private BigDecimal valorNota;
     @OneToMany(mappedBy = "numeroNota")
-    private List<Possui> possuiList;
+    private List<Protocolo> protocoloList;
     @OneToMany(mappedBy = "numeroNota")
     private List<Envia> enviaList;
     @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
@@ -62,8 +64,6 @@ public class Notafiscal implements Serializable {
     @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
     @ManyToOne
     private Protocolo idProtocolo;
-    @OneToMany(mappedBy = "numeroNota")
-    private List<Protocolo> protocoloList;
 
     public Notafiscal() {
     }
@@ -96,20 +96,20 @@ public class Notafiscal implements Serializable {
         this.dataEmissao = dataEmissao;
     }
 
-    public Integer getValorNota() {
+    public BigDecimal getValorNota() {
         return valorNota;
     }
 
-    public void setValorNota(Integer valorNota) {
+    public void setValorNota(BigDecimal valorNota) {
         this.valorNota = valorNota;
     }
 
-    public List<Possui> getPossuiList() {
-        return possuiList;
+    public List<Protocolo> getProtocoloList() {
+        return protocoloList;
     }
 
-    public void setPossuiList(List<Possui> possuiList) {
-        this.possuiList = possuiList;
+    public void setProtocoloList(List<Protocolo> protocoloList) {
+        this.protocoloList = protocoloList;
     }
 
     public List<Envia> getEnviaList() {
@@ -142,14 +142,6 @@ public class Notafiscal implements Serializable {
 
     public void setIdProtocolo(Protocolo idProtocolo) {
         this.idProtocolo = idProtocolo;
-    }
-
-    public List<Protocolo> getProtocoloList() {
-        return protocoloList;
-    }
-
-    public void setProtocoloList(List<Protocolo> protocoloList) {
-        this.protocoloList = protocoloList;
     }
 
     @Override

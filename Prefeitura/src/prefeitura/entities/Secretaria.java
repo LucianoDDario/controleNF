@@ -39,14 +39,11 @@ public class Secretaria implements Serializable {
     private String nomeSecretaria;
     @OneToMany(mappedBy = "idSecretaria")
     private List<Oficio> oficioList;
-    @OneToMany(mappedBy = "idSecretaria")
-    private List<Envia1> envia1List;
 
     public Secretaria() {
     }
 
-    public Secretaria(Integer idSecretaria, String nomeSecretaria) {
-        this.idSecretaria = idSecretaria;
+    public Secretaria(String nomeSecretaria) {
         this.nomeSecretaria = nomeSecretaria;
     }
 
@@ -78,14 +75,6 @@ public class Secretaria implements Serializable {
         this.oficioList = oficioList;
     }
 
-    public List<Envia1> getEnvia1List() {
-        return envia1List;
-    }
-
-    public void setEnvia1List(List<Envia1> envia1List) {
-        this.envia1List = envia1List;
-    }
-
     @Override
     public int hashCode() {
         int hash = 0;
@@ -108,7 +97,7 @@ public class Secretaria implements Serializable {
 
     @Override
     public String toString() {
-        return idSecretaria + "-" + nomeSecretaria;
+        return idSecretaria + " - " + nomeSecretaria;
     }
     
 }
