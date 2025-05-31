@@ -135,7 +135,7 @@ public class Fornecedor implements Serializable {
 
     @Override
     public String toString() {
-        return "prefeitura.entities.Fornecedor[ idFornecedor=" + idFornecedor + " ]";
+        return String.valueOf(idFornecedor);
     }
     
 }

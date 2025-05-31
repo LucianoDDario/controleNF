@@ -75,6 +75,18 @@ public class Processo implements Serializable {
     public Processo() {
     }
 
+    public Processo(Protocolo idProtocolo, int numeroProcesso, String tipoProcesso, Integer numeroOficio, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio idOficio) {
+        this.idProtocolo = idProtocolo;
+        this.numeroProcesso = numeroProcesso;
+        this.tipoProcesso = tipoProcesso;
+        this.numeroOficio = numeroOficio;
+        this.dataSaidaCompras = dataSaidaCompras;
+        this.idFornecedor = idFornecedor;
+        this.idOficio = idOficio;
+    }
+
+    
+
     public Processo(Integer idProcesso) {
         this.idProcesso = idProcesso;
     }
