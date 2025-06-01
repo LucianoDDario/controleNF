@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -19,6 +18,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -37,13 +37,6 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Oficio.findByDataOficio", query = "SELECT o FROM Oficio o WHERE o.dataOficio = :dataOficio")})
 public class Oficio implements Serializable {
 
-    @OneToMany(mappedBy = "idOficio")
-    private Collection<Protocolo> protocoloCollection;
-
-    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
-    @ManyToOne
-    private Protocolo idProtocolo;
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,7 +52,12 @@ public class Oficio implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date dataOficio;
     @OneToMany(mappedBy = "idOficio")
+    private List<Protocolo> protocoloList;
+    @OneToMany(mappedBy = "idOficio")
     private List<Processo> processoList;
+    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
+    @OneToOne
+    private Protocolo idProtocolo;
     @JoinColumn(name = "IdSecretaria", referencedColumnName = "IdSecretaria")
     @ManyToOne
     private Secretaria idSecretaria;
@@ -67,27 +65,19 @@ public class Oficio implements Serializable {
     public Oficio() {
     }
 
-    public Oficio(Protocolo idProtocolo, int numeroOficio, String descricao, Date dataOficio, Secretaria idSecretaria) {
-        this.idProtocolo = idProtocolo;
-        this.numeroOficio = numeroOficio;
-        this.descricao = descricao;
-        this.dataOficio = dataOficio;
-        this.idSecretaria = idSecretaria;
-    }
-
-    
-    
-    
-
     public Oficio(Integer idOficio) {
         this.idOficio = idOficio;
     }
 
-    public Oficio(Integer idOficio, int numeroOficio) {
-        this.idOficio = idOficio;
+    public Oficio(int numeroOficio, String descricao, Date dataOficio, Protocolo idProtocolo, Secretaria idSecretaria) {
         this.numeroOficio = numeroOficio;
+        this.descricao = descricao;
+        this.dataOficio = dataOficio;
+        this.idProtocolo = idProtocolo;
+        this.idSecretaria = idSecretaria;
     }
 
+    
     public Integer getIdOficio() {
         return idOficio;
     }
@@ -120,12 +110,28 @@ public class Oficio implements Serializable {
         this.dataOficio = dataOficio;
     }
 
+    public List<Protocolo> getProtocoloList() {
+        return protocoloList;
+    }
+
+    public void setProtocoloList(List<Protocolo> protocoloList) {
+        this.protocoloList = protocoloList;
+    }
+
     public List<Processo> getProcessoList() {
         return processoList;
     }
 
     public void setProcessoList(List<Processo> processoList) {
         this.processoList = processoList;
+    }
+
+    public Protocolo getIdProtocolo() {
+        return idProtocolo;
+    }
+
+    public void setIdProtocolo(Protocolo idProtocolo) {
+        this.idProtocolo = idProtocolo;
     }
 
     public Secretaria getIdSecretaria() {
@@ -159,22 +165,6 @@ public class Oficio implements Serializable {
     @Override
     public String toString() {
         return "prefeitura.entities.Oficio[ idOficio=" + idOficio + " ]";
-    }
-
-    public Protocolo getIdProtocolo() {
-        return idProtocolo;
-    }
-
-    public void setIdProtocolo(Protocolo idProtocolo) {
-        this.idProtocolo = idProtocolo;
-    }
-
-    public Collection<Protocolo> getProtocoloCollection() {
-        return protocoloCollection;
-    }
-
-    public void setProtocoloCollection(Collection<Protocolo> protocoloCollection) {
-        this.protocoloCollection = protocoloCollection;
     }
     
 }

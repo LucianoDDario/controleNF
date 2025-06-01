@@ -55,6 +55,7 @@ public class Fornecedor implements Serializable {
         this.nomeEmpresa = nomeEmpresa;
         this.cnpj = cnpj;
     }
+    
 
     public Fornecedor(Integer idFornecedor) {
         this.idFornecedor = idFornecedor;

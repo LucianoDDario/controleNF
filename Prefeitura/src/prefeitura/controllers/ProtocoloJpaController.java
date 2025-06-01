@@ -10,6 +10,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import prefeitura.entities.Notafiscal;
+import prefeitura.entities.Oficio;
+import prefeitura.entities.Processo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -33,6 +35,9 @@ public class ProtocoloJpaController implements Serializable {
     }
 
     public void create(Protocolo protocolo) {
+        if (protocolo.getProcessoList() == null) {
+            protocolo.setProcessoList(new ArrayList<Processo>());
+        }
         if (protocolo.getNotafiscalList() == null) {
             protocolo.setNotafiscalList(new ArrayList<Notafiscal>());
         }
@@ -40,11 +45,32 @@ public class ProtocoloJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Notafiscal numeroNota = protocolo.getNumeroNota();
-            if (numeroNota != null) {
-                numeroNota = em.getReference(numeroNota.getClass(), numeroNota.getIdNotaFiscal());
-                protocolo.setNumeroNota(numeroNota);
+            Notafiscal idNota = protocolo.getIdNota();
+            if (idNota != null) {
+                idNota = em.getReference(idNota.getClass(), idNota.getIdNotaFiscal());
+                protocolo.setIdNota(idNota);
             }
+            Oficio idOficio = protocolo.getIdOficio();
+            if (idOficio != null) {
+                idOficio = em.getReference(idOficio.getClass(), idOficio.getIdOficio());
+                protocolo.setIdOficio(idOficio);
+            }
+            Processo idProcesso = protocolo.getIdProcesso();
+            if (idProcesso != null) {
+                idProcesso = em.getReference(idProcesso.getClass(), idProcesso.getIdProcesso());
+                protocolo.setIdProcesso(idProcesso);
+            }
+            Oficio oficio = protocolo.getOficio();
+            if (oficio != null) {
+                oficio = em.getReference(oficio.getClass(), oficio.getIdOficio());
+                protocolo.setOficio(oficio);
+            }
+            List<Processo> attachedProcessoList = new ArrayList<Processo>();
+            for (Processo processoListProcessoToAttach : protocolo.getProcessoList()) {
+                processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getIdProcesso());
+                attachedProcessoList.add(processoListProcessoToAttach);
+            }
+            protocolo.setProcessoList(attachedProcessoList);
             List<Notafiscal> attachedNotafiscalList = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNotafiscalToAttach : protocolo.getNotafiscalList()) {
                 notafiscalListNotafiscalToAttach = em.getReference(notafiscalListNotafiscalToAttach.getClass(), notafiscalListNotafiscalToAttach.getIdNotaFiscal());
@@ -52,9 +78,35 @@ public class ProtocoloJpaController implements Serializable {
             }
             protocolo.setNotafiscalList(attachedNotafiscalList);
             em.persist(protocolo);
-            if (numeroNota != null) {
-                numeroNota.getProtocoloList().add(protocolo);
-                numeroNota = em.merge(numeroNota);
+            if (idNota != null) {
+                idNota.getProtocoloList().add(protocolo);
+                idNota = em.merge(idNota);
+            }
+            if (idOficio != null) {
+                idOficio.getProtocoloList().add(protocolo);
+                idOficio = em.merge(idOficio);
+            }
+            if (idProcesso != null) {
+                idProcesso.getProtocoloList().add(protocolo);
+                idProcesso = em.merge(idProcesso);
+            }
+            if (oficio != null) {
+                Protocolo oldIdProtocoloOfOficio = oficio.getIdProtocolo();
+                if (oldIdProtocoloOfOficio != null) {
+                    oldIdProtocoloOfOficio.setOficio(null);
+                    oldIdProtocoloOfOficio = em.merge(oldIdProtocoloOfOficio);
+                }
+                oficio.setIdProtocolo(protocolo);
+                oficio = em.merge(oficio);
+            }
+            for (Processo processoListProcesso : protocolo.getProcessoList()) {
+                Protocolo oldIdProtocoloOfProcessoListProcesso = processoListProcesso.getIdProtocolo();
+                processoListProcesso.setIdProtocolo(protocolo);
+                processoListProcesso = em.merge(processoListProcesso);
+                if (oldIdProtocoloOfProcessoListProcesso != null) {
+                    oldIdProtocoloOfProcessoListProcesso.getProcessoList().remove(processoListProcesso);
+                    oldIdProtocoloOfProcessoListProcesso = em.merge(oldIdProtocoloOfProcessoListProcesso);
+                }
             }
             for (Notafiscal notafiscalListNotafiscal : protocolo.getNotafiscalList()) {
                 Protocolo oldIdProtocoloOfNotafiscalListNotafiscal = notafiscalListNotafiscal.getIdProtocolo();
@@ -79,14 +131,41 @@ public class ProtocoloJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Protocolo persistentProtocolo = em.find(Protocolo.class, protocolo.getIdProtocolo());
-            Notafiscal numeroNotaOld = persistentProtocolo.getNumeroNota();
-            Notafiscal numeroNotaNew = protocolo.getNumeroNota();
+            Notafiscal idNotaOld = persistentProtocolo.getIdNota();
+            Notafiscal idNotaNew = protocolo.getIdNota();
+            Oficio idOficioOld = persistentProtocolo.getIdOficio();
+            Oficio idOficioNew = protocolo.getIdOficio();
+            Processo idProcessoOld = persistentProtocolo.getIdProcesso();
+            Processo idProcessoNew = protocolo.getIdProcesso();
+            Oficio oficioOld = persistentProtocolo.getOficio();
+            Oficio oficioNew = protocolo.getOficio();
+            List<Processo> processoListOld = persistentProtocolo.getProcessoList();
+            List<Processo> processoListNew = protocolo.getProcessoList();
             List<Notafiscal> notafiscalListOld = persistentProtocolo.getNotafiscalList();
             List<Notafiscal> notafiscalListNew = protocolo.getNotafiscalList();
-            if (numeroNotaNew != null) {
-                numeroNotaNew = em.getReference(numeroNotaNew.getClass(), numeroNotaNew.getIdNotaFiscal());
-                protocolo.setNumeroNota(numeroNotaNew);
+            if (idNotaNew != null) {
+                idNotaNew = em.getReference(idNotaNew.getClass(), idNotaNew.getIdNotaFiscal());
+                protocolo.setIdNota(idNotaNew);
             }
+            if (idOficioNew != null) {
+                idOficioNew = em.getReference(idOficioNew.getClass(), idOficioNew.getIdOficio());
+                protocolo.setIdOficio(idOficioNew);
+            }
+            if (idProcessoNew != null) {
+                idProcessoNew = em.getReference(idProcessoNew.getClass(), idProcessoNew.getIdProcesso());
+                protocolo.setIdProcesso(idProcessoNew);
+            }
+            if (oficioNew != null) {
+                oficioNew = em.getReference(oficioNew.getClass(), oficioNew.getIdOficio());
+                protocolo.setOficio(oficioNew);
+            }
+            List<Processo> attachedProcessoListNew = new ArrayList<Processo>();
+            for (Processo processoListNewProcessoToAttach : processoListNew) {
+                processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getIdProcesso());
+                attachedProcessoListNew.add(processoListNewProcessoToAttach);
+            }
+            processoListNew = attachedProcessoListNew;
+            protocolo.setProcessoList(processoListNew);
             List<Notafiscal> attachedNotafiscalListNew = new ArrayList<Notafiscal>();
             for (Notafiscal notafiscalListNewNotafiscalToAttach : notafiscalListNew) {
                 notafiscalListNewNotafiscalToAttach = em.getReference(notafiscalListNewNotafiscalToAttach.getClass(), notafiscalListNewNotafiscalToAttach.getIdNotaFiscal());
@@ -95,13 +174,59 @@ public class ProtocoloJpaController implements Serializable {
             notafiscalListNew = attachedNotafiscalListNew;
             protocolo.setNotafiscalList(notafiscalListNew);
             protocolo = em.merge(protocolo);
-            if (numeroNotaOld != null && !numeroNotaOld.equals(numeroNotaNew)) {
-                numeroNotaOld.getProtocoloList().remove(protocolo);
-                numeroNotaOld = em.merge(numeroNotaOld);
+            if (idNotaOld != null && !idNotaOld.equals(idNotaNew)) {
+                idNotaOld.getProtocoloList().remove(protocolo);
+                idNotaOld = em.merge(idNotaOld);
             }
-            if (numeroNotaNew != null && !numeroNotaNew.equals(numeroNotaOld)) {
-                numeroNotaNew.getProtocoloList().add(protocolo);
-                numeroNotaNew = em.merge(numeroNotaNew);
+            if (idNotaNew != null && !idNotaNew.equals(idNotaOld)) {
+                idNotaNew.getProtocoloList().add(protocolo);
+                idNotaNew = em.merge(idNotaNew);
+            }
+            if (idOficioOld != null && !idOficioOld.equals(idOficioNew)) {
+                idOficioOld.getProtocoloList().remove(protocolo);
+                idOficioOld = em.merge(idOficioOld);
+            }
+            if (idOficioNew != null && !idOficioNew.equals(idOficioOld)) {
+                idOficioNew.getProtocoloList().add(protocolo);
+                idOficioNew = em.merge(idOficioNew);
+            }
+            if (idProcessoOld != null && !idProcessoOld.equals(idProcessoNew)) {
+                idProcessoOld.getProtocoloList().remove(protocolo);
+                idProcessoOld = em.merge(idProcessoOld);
+            }
+            if (idProcessoNew != null && !idProcessoNew.equals(idProcessoOld)) {
+                idProcessoNew.getProtocoloList().add(protocolo);
+                idProcessoNew = em.merge(idProcessoNew);
+            }
+            if (oficioOld != null && !oficioOld.equals(oficioNew)) {
+                oficioOld.setIdProtocolo(null);
+                oficioOld = em.merge(oficioOld);
+            }
+            if (oficioNew != null && !oficioNew.equals(oficioOld)) {
+                Protocolo oldIdProtocoloOfOficio = oficioNew.getIdProtocolo();
+                if (oldIdProtocoloOfOficio != null) {
+                    oldIdProtocoloOfOficio.setOficio(null);
+                    oldIdProtocoloOfOficio = em.merge(oldIdProtocoloOfOficio);
+                }
+                oficioNew.setIdProtocolo(protocolo);
+                oficioNew = em.merge(oficioNew);
+            }
+            for (Processo processoListOldProcesso : processoListOld) {
+                if (!processoListNew.contains(processoListOldProcesso)) {
+                    processoListOldProcesso.setIdProtocolo(null);
+                    processoListOldProcesso = em.merge(processoListOldProcesso);
+                }
+            }
+            for (Processo processoListNewProcesso : processoListNew) {
+                if (!processoListOld.contains(processoListNewProcesso)) {
+                    Protocolo oldIdProtocoloOfProcessoListNewProcesso = processoListNewProcesso.getIdProtocolo();
+                    processoListNewProcesso.setIdProtocolo(protocolo);
+                    processoListNewProcesso = em.merge(processoListNewProcesso);
+                    if (oldIdProtocoloOfProcessoListNewProcesso != null && !oldIdProtocoloOfProcessoListNewProcesso.equals(protocolo)) {
+                        oldIdProtocoloOfProcessoListNewProcesso.getProcessoList().remove(processoListNewProcesso);
+                        oldIdProtocoloOfProcessoListNewProcesso = em.merge(oldIdProtocoloOfProcessoListNewProcesso);
+                    }
+                }
             }
             for (Notafiscal notafiscalListOldNotafiscal : notafiscalListOld) {
                 if (!notafiscalListNew.contains(notafiscalListOldNotafiscal)) {
@@ -149,10 +274,30 @@ public class ProtocoloJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The protocolo with id " + id + " no longer exists.", enfe);
             }
-            Notafiscal numeroNota = protocolo.getNumeroNota();
-            if (numeroNota != null) {
-                numeroNota.getProtocoloList().remove(protocolo);
-                numeroNota = em.merge(numeroNota);
+            Notafiscal idNota = protocolo.getIdNota();
+            if (idNota != null) {
+                idNota.getProtocoloList().remove(protocolo);
+                idNota = em.merge(idNota);
+            }
+            Oficio idOficio = protocolo.getIdOficio();
+            if (idOficio != null) {
+                idOficio.getProtocoloList().remove(protocolo);
+                idOficio = em.merge(idOficio);
+            }
+            Processo idProcesso = protocolo.getIdProcesso();
+            if (idProcesso != null) {
+                idProcesso.getProtocoloList().remove(protocolo);
+                idProcesso = em.merge(idProcesso);
+            }
+            Oficio oficio = protocolo.getOficio();
+            if (oficio != null) {
+                oficio.setIdProtocolo(null);
+                oficio = em.merge(oficio);
+            }
+            List<Processo> processoList = protocolo.getProcessoList();
+            for (Processo processoListProcesso : processoList) {
+                processoListProcesso.setIdProtocolo(null);
+                processoListProcesso = em.merge(processoListProcesso);
             }
             List<Notafiscal> notafiscalList = protocolo.getNotafiscalList();
             for (Notafiscal notafiscalListNotafiscal : notafiscalList) {

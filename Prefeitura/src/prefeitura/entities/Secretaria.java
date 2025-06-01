@@ -46,6 +46,7 @@ public class Secretaria implements Serializable {
     public Secretaria(String nomeSecretaria) {
         this.nomeSecretaria = nomeSecretaria;
     }
+    
 
     public Secretaria(Integer idSecretaria) {
         this.idSecretaria = idSecretaria;

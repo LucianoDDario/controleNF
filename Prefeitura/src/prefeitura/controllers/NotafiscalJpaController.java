@@ -83,21 +83,21 @@ public class NotafiscalJpaController implements Serializable {
                 idProcesso = em.merge(idProcesso);
             }
             if (idProtocolo != null) {
-                Notafiscal oldNumeroNotaOfIdProtocolo = idProtocolo.getNumeroNota();
-                if (oldNumeroNotaOfIdProtocolo != null) {
-                    oldNumeroNotaOfIdProtocolo.setIdProtocolo(null);
-                    oldNumeroNotaOfIdProtocolo = em.merge(oldNumeroNotaOfIdProtocolo);
+                Notafiscal oldIdNotaOfIdProtocolo = idProtocolo.getIdNota();
+                if (oldIdNotaOfIdProtocolo != null) {
+                    oldIdNotaOfIdProtocolo.setIdProtocolo(null);
+                    oldIdNotaOfIdProtocolo = em.merge(oldIdNotaOfIdProtocolo);
                 }
-                idProtocolo.setNumeroNota(notafiscal);
+                idProtocolo.setIdNota(notafiscal);
                 idProtocolo = em.merge(idProtocolo);
             }
             for (Protocolo protocoloListProtocolo : notafiscal.getProtocoloList()) {
-                Notafiscal oldNumeroNotaOfProtocoloListProtocolo = protocoloListProtocolo.getNumeroNota();
-                protocoloListProtocolo.setNumeroNota(notafiscal);
+                Notafiscal oldIdNotaOfProtocoloListProtocolo = protocoloListProtocolo.getIdNota();
+                protocoloListProtocolo.setIdNota(notafiscal);
                 protocoloListProtocolo = em.merge(protocoloListProtocolo);
-                if (oldNumeroNotaOfProtocoloListProtocolo != null) {
-                    oldNumeroNotaOfProtocoloListProtocolo.getProtocoloList().remove(protocoloListProtocolo);
-                    oldNumeroNotaOfProtocoloListProtocolo = em.merge(oldNumeroNotaOfProtocoloListProtocolo);
+                if (oldIdNotaOfProtocoloListProtocolo != null) {
+                    oldIdNotaOfProtocoloListProtocolo.getProtocoloList().remove(protocoloListProtocolo);
+                    oldIdNotaOfProtocoloListProtocolo = em.merge(oldIdNotaOfProtocoloListProtocolo);
                 }
             }
             for (Envia enviaListEnvia : notafiscal.getEnviaList()) {
@@ -177,32 +177,32 @@ public class NotafiscalJpaController implements Serializable {
                 idProcessoNew = em.merge(idProcessoNew);
             }
             if (idProtocoloOld != null && !idProtocoloOld.equals(idProtocoloNew)) {
-                idProtocoloOld.setNumeroNota(null);
+                idProtocoloOld.setIdNota(null);
                 idProtocoloOld = em.merge(idProtocoloOld);
             }
             if (idProtocoloNew != null && !idProtocoloNew.equals(idProtocoloOld)) {
-                Notafiscal oldNumeroNotaOfIdProtocolo = idProtocoloNew.getNumeroNota();
-                if (oldNumeroNotaOfIdProtocolo != null) {
-                    oldNumeroNotaOfIdProtocolo.setIdProtocolo(null);
-                    oldNumeroNotaOfIdProtocolo = em.merge(oldNumeroNotaOfIdProtocolo);
+                Notafiscal oldIdNotaOfIdProtocolo = idProtocoloNew.getIdNota();
+                if (oldIdNotaOfIdProtocolo != null) {
+                    oldIdNotaOfIdProtocolo.setIdProtocolo(null);
+                    oldIdNotaOfIdProtocolo = em.merge(oldIdNotaOfIdProtocolo);
                 }
-                idProtocoloNew.setNumeroNota(notafiscal);
+                idProtocoloNew.setIdNota(notafiscal);
                 idProtocoloNew = em.merge(idProtocoloNew);
             }
             for (Protocolo protocoloListOldProtocolo : protocoloListOld) {
                 if (!protocoloListNew.contains(protocoloListOldProtocolo)) {
-                    protocoloListOldProtocolo.setNumeroNota(null);
+                    protocoloListOldProtocolo.setIdNota(null);
                     protocoloListOldProtocolo = em.merge(protocoloListOldProtocolo);
                 }
             }
             for (Protocolo protocoloListNewProtocolo : protocoloListNew) {
                 if (!protocoloListOld.contains(protocoloListNewProtocolo)) {
-                    Notafiscal oldNumeroNotaOfProtocoloListNewProtocolo = protocoloListNewProtocolo.getNumeroNota();
-                    protocoloListNewProtocolo.setNumeroNota(notafiscal);
+                    Notafiscal oldIdNotaOfProtocoloListNewProtocolo = protocoloListNewProtocolo.getIdNota();
+                    protocoloListNewProtocolo.setIdNota(notafiscal);
                     protocoloListNewProtocolo = em.merge(protocoloListNewProtocolo);
-                    if (oldNumeroNotaOfProtocoloListNewProtocolo != null && !oldNumeroNotaOfProtocoloListNewProtocolo.equals(notafiscal)) {
-                        oldNumeroNotaOfProtocoloListNewProtocolo.getProtocoloList().remove(protocoloListNewProtocolo);
-                        oldNumeroNotaOfProtocoloListNewProtocolo = em.merge(oldNumeroNotaOfProtocoloListNewProtocolo);
+                    if (oldIdNotaOfProtocoloListNewProtocolo != null && !oldIdNotaOfProtocoloListNewProtocolo.equals(notafiscal)) {
+                        oldIdNotaOfProtocoloListNewProtocolo.getProtocoloList().remove(protocoloListNewProtocolo);
+                        oldIdNotaOfProtocoloListNewProtocolo = em.merge(oldIdNotaOfProtocoloListNewProtocolo);
                     }
                 }
             }
@@ -264,12 +264,12 @@ public class NotafiscalJpaController implements Serializable {
             }
             Protocolo idProtocolo = notafiscal.getIdProtocolo();
             if (idProtocolo != null) {
-                idProtocolo.setNumeroNota(null);
+                idProtocolo.setIdNota(null);
                 idProtocolo = em.merge(idProtocolo);
             }
             List<Protocolo> protocoloList = notafiscal.getProtocoloList();
             for (Protocolo protocoloListProtocolo : protocoloList) {
-                protocoloListProtocolo.setNumeroNota(null);
+                protocoloListProtocolo.setIdNota(null);
                 protocoloListProtocolo = em.merge(protocoloListProtocolo);
             }
             List<Envia> enviaList = notafiscal.getEnviaList();

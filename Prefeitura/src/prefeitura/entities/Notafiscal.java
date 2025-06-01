@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -34,7 +33,8 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Notafiscal.findByIdNotaFiscal", query = "SELECT n FROM Notafiscal n WHERE n.idNotaFiscal = :idNotaFiscal"),
     @NamedQuery(name = "Notafiscal.findByNumeroNota", query = "SELECT n FROM Notafiscal n WHERE n.numeroNota = :numeroNota"),
     @NamedQuery(name = "Notafiscal.findByDataEmissao", query = "SELECT n FROM Notafiscal n WHERE n.dataEmissao = :dataEmissao"),
-    @NamedQuery(name = "Notafiscal.findByValorNota", query = "SELECT n FROM Notafiscal n WHERE n.valorNota = :valorNota")})
+    @NamedQuery(name = "Notafiscal.findByValorNota", query = "SELECT n FROM Notafiscal n WHERE n.valorNota = :valorNota"),
+    @NamedQuery(name = "Notafiscal.findByDataChegada", query = "SELECT n FROM Notafiscal n WHERE n.dataChegada = :dataChegada")})
 public class Notafiscal implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -48,10 +48,12 @@ public class Notafiscal implements Serializable {
     @Column(name = "DataEmissao")
     @Temporal(TemporalType.DATE)
     private Date dataEmissao;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "ValorNota")
-    private BigDecimal valorNota;
-    @OneToMany(mappedBy = "numeroNota")
+    private Integer valorNota;
+    @Column(name = "DataChegada")
+    @Temporal(TemporalType.DATE)
+    private Date dataChegada;
+    @OneToMany(mappedBy = "idNota")
     private List<Protocolo> protocoloList;
     @OneToMany(mappedBy = "numeroNota")
     private List<Envia> enviaList;
@@ -67,6 +69,17 @@ public class Notafiscal implements Serializable {
 
     public Notafiscal() {
     }
+
+    public Notafiscal(Integer numeroNota, Date dataEmissao, Integer valorNota, Date dataChegada, Fornecedor idFornecedor, Processo idProcesso, Protocolo idProtocolo) {
+        this.numeroNota = numeroNota;
+        this.dataEmissao = dataEmissao;
+        this.valorNota = valorNota;
+        this.dataChegada = dataChegada;
+        this.idFornecedor = idFornecedor;
+        this.idProcesso = idProcesso;
+        this.idProtocolo = idProtocolo;
+    }
+    
 
     public Notafiscal(Integer idNotaFiscal) {
         this.idNotaFiscal = idNotaFiscal;
@@ -96,12 +109,20 @@ public class Notafiscal implements Serializable {
         this.dataEmissao = dataEmissao;
     }
 
-    public BigDecimal getValorNota() {
+    public Integer getValorNota() {
         return valorNota;
     }
 
-    public void setValorNota(BigDecimal valorNota) {
+    public void setValorNota(Integer valorNota) {
         this.valorNota = valorNota;
+    }
+
+    public Date getDataChegada() {
+        return dataChegada;
+    }
+
+    public void setDataChegada(Date dataChegada) {
+        this.dataChegada = dataChegada;
     }
 
     public List<Protocolo> getProtocoloList() {

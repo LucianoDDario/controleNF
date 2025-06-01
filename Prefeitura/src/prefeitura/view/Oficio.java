@@ -391,39 +391,37 @@ public class Oficio extends javax.swing.JFrame {
             }
             List<Protocolo> protocolos = protocoloController.findProtocoloEntities();
             for (Protocolo protocolo : protocolos) {
-                if (numeroProtocolo.equals(protocolo.getNumeroProtocolo())) {
+                if (Integer.valueOf(numeroProtocolo).equals(protocolo.getNumeroProtocolo())) {
                     throw new Exception("Protocolo já existente");
                 }
             }
 
-            prefeitura.entities.Protocolo protocolo = new prefeitura.entities.Protocolo(Integer.parseInt(numeroProtocolo), formato.parse(dataStr));
+            prefeitura.entities.Protocolo protocolo = new prefeitura.entities.Protocolo(Integer.valueOf(numeroProtocolo), formato.parse(dataStr));
             protocoloController.create(protocolo);
             idProtocolo = protocolo.getIdProtocolo();
-            
+
             try {
-            if (dataStr.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()) {
-                throw new Exception("Preencha todos os campos");
+                if (dataStr.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()) {
+                    throw new Exception("Preencha todos os campos");
+                }
+
+                protocolo = protocoloController.findProtocolo(idProtocolo);
+
+                prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(Integer.parseInt(numeroOficio),descricao, formato.parse(dataStr),protocolo, secretaria);
+                oficioController.create(oficio);
+
+                prefeitura.entities.Protocolo protocolo1 = oficio.getIdProtocolo();
+                protocolo1.setIdOficio(oficio);
+                protocoloController.edit(protocolo1);
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(),
+                        "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+
             }
 
-            protocolo = protocoloController.findProtocolo(idProtocolo);
-
-            prefeitura.entities.Oficio oficio = new prefeitura.entities.Oficio(protocolo, Integer.parseInt(numeroOficio), descricao, formato.parse(dataStr), secretaria);
-            oficioController.create(oficio);  
-            
-            prefeitura.entities.Protocolo protocolo1 = oficio.getIdProtocolo();
-            protocolo1.setIdOficio(oficio);
-            protocoloController.edit(protocolo1);
-            
-            
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,
-                    e.getMessage(),
-                    "ERRO",
-                    JOptionPane.ERROR_MESSAGE);
-
-        }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     e.getMessage(),
@@ -431,22 +429,20 @@ public class Oficio extends javax.swing.JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
 
-        
         atualizarTabela();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
 
         if (evt.getClickCount() == 2) {
-            
-            
+
             int i = jTable1.getSelectedRow();
-            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());                                           
-            
+            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
+
             jTextField4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
             jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
-            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());                                 
-            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString());                                 
+            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
+            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString());
             jButton4.setEnabled(true);
             jButton5.setEnabled(true);
             jButton3.setEnabled(false);
@@ -459,8 +455,10 @@ public class Oficio extends javax.swing.JFrame {
         try {
             if (JOptionPane.showConfirmDialog(this, "Remover o ofício " + IdOficio + " ?") == JOptionPane.OK_OPTION) {
                 
+                Integer idProtocolo = oficioController.findOficio(IdOficio).getIdProtocolo().getIdProtocolo();
                 oficioController.destroy(IdOficio);
-                
+                protocoloController.destroy(idProtocolo);
+
                 JOptionPane.showConfirmDialog(this,
                         "Ofício " + IdOficio + " removido com sucesso",
                         "SUCESSO",

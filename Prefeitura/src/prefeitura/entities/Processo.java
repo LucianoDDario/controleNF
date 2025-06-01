@@ -5,7 +5,6 @@
 package prefeitura.entities;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Basic;
@@ -38,13 +37,6 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "Processo.findByDataSaidaCompras", query = "SELECT p FROM Processo p WHERE p.dataSaidaCompras = :dataSaidaCompras")})
 public class Processo implements Serializable {
 
-    @OneToMany(mappedBy = "idProcesso")
-    private Collection<Protocolo> protocoloCollection;
-
-    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
-    @ManyToOne
-    private Protocolo idProtocolo;
-
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -61,12 +53,17 @@ public class Processo implements Serializable {
     @Column(name = "DataSaidaCompras")
     @Temporal(TemporalType.DATE)
     private Date dataSaidaCompras;
+    @OneToMany(mappedBy = "idProcesso")
+    private List<Protocolo> protocoloList;
     @JoinColumn(name = "IdFornecedor", referencedColumnName = "IdFornecedor")
     @ManyToOne
     private Fornecedor idFornecedor;
     @JoinColumn(name = "IdOficio", referencedColumnName = "IdOficio")
     @ManyToOne
     private Oficio idOficio;
+    @JoinColumn(name = "IdProtocolo", referencedColumnName = "IdProtocolo")
+    @ManyToOne
+    private Protocolo idProtocolo;
     @OneToMany(mappedBy = "idProcesso")
     private List<Notafiscal> notafiscalList;
     @OneToMany(mappedBy = "numeroProcesso")
@@ -75,16 +72,16 @@ public class Processo implements Serializable {
     public Processo() {
     }
 
-    public Processo(Protocolo idProtocolo, int numeroProcesso, String tipoProcesso, Integer numeroOficio, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio idOficio) {
-        this.idProtocolo = idProtocolo;
+    public Processo(int numeroProcesso, String tipoProcesso, Integer numeroOficio, Date dataSaidaCompras, Fornecedor idFornecedor, Oficio idOficio, Protocolo idProtocolo) {
         this.numeroProcesso = numeroProcesso;
         this.tipoProcesso = tipoProcesso;
         this.numeroOficio = numeroOficio;
         this.dataSaidaCompras = dataSaidaCompras;
         this.idFornecedor = idFornecedor;
         this.idOficio = idOficio;
+        this.idProtocolo = idProtocolo;
     }
-
+    
     
 
     public Processo(Integer idProcesso) {
@@ -136,6 +133,14 @@ public class Processo implements Serializable {
         this.dataSaidaCompras = dataSaidaCompras;
     }
 
+    public List<Protocolo> getProtocoloList() {
+        return protocoloList;
+    }
+
+    public void setProtocoloList(List<Protocolo> protocoloList) {
+        this.protocoloList = protocoloList;
+    }
+
     public Fornecedor getIdFornecedor() {
         return idFornecedor;
     }
@@ -150,6 +155,14 @@ public class Processo implements Serializable {
 
     public void setIdOficio(Oficio idOficio) {
         this.idOficio = idOficio;
+    }
+
+    public Protocolo getIdProtocolo() {
+        return idProtocolo;
+    }
+
+    public void setIdProtocolo(Protocolo idProtocolo) {
+        this.idProtocolo = idProtocolo;
     }
 
     public List<Notafiscal> getNotafiscalList() {
@@ -191,22 +204,6 @@ public class Processo implements Serializable {
     @Override
     public String toString() {
         return "prefeitura.entities.Processo[ idProcesso=" + idProcesso + " ]";
-    }
-
-    public Protocolo getIdProtocolo() {
-        return idProtocolo;
-    }
-
-    public void setIdProtocolo(Protocolo idProtocolo) {
-        this.idProtocolo = idProtocolo;
-    }
-
-    public Collection<Protocolo> getProtocoloCollection() {
-        return protocoloCollection;
-    }
-
-    public void setProtocoloCollection(Collection<Protocolo> protocoloCollection) {
-        this.protocoloCollection = protocoloCollection;
     }
     
 }

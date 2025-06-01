@@ -7,6 +7,7 @@ package prefeitura.view;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -25,10 +26,8 @@ import prefeitura.entities.Protocolo;
 public class Processo extends javax.swing.JFrame {
 
     EntityManagerFactory factory;
-    OficioJpaController oficioController;
     ProcessoJpaController processoController;
     FornecedorJpaController fornecedorController;
-    SecretariaJpaController secretariaController;
     ProtocoloJpaController protocoloController;
 
     public Processo() {
@@ -45,9 +44,7 @@ public class Processo extends javax.swing.JFrame {
 
     private void abrirConexao() {
         try {
-            factory = Persistence.createEntityManagerFactory("PrefeituraFuncionandoPU");
-            oficioController = new OficioJpaController(factory);
-            secretariaController = new SecretariaJpaController(factory);
+            factory = Persistence.createEntityManagerFactory("PrefeituraFuncionandoPU");            
             processoController = new ProcessoJpaController(factory);
             fornecedorController = new FornecedorJpaController(factory);
             protocoloController = new ProtocoloJpaController(factory);
@@ -71,7 +68,8 @@ public class Processo extends javax.swing.JFrame {
         jTextField7.setText("");
         atualizarTabela();
         formatarCampo();
-        
+        colocarData();
+
         jButton3.setEnabled(true);
         jButton4.setEnabled(false);
         jButton6.setEnabled(true);
@@ -79,7 +77,7 @@ public class Processo extends javax.swing.JFrame {
         jTextField4.requestFocus();
         jTextField4.setEnabled(true);
 
-        jTextField4.setEnabled(true);
+        
         jTextField5.setEnabled(false);
         jTextField1.setEnabled(false);
         jTextField2.setEnabled(false);
@@ -88,6 +86,10 @@ public class Processo extends javax.swing.JFrame {
         jButton2.setEnabled(false);
         jComboBox1.setEnabled(false);
 
+    }
+
+    private void colocarData() {
+        jFormattedTextField1.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
     }
 
     private void atualizarTabela() {
@@ -99,10 +101,11 @@ public class Processo extends javax.swing.JFrame {
             SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
             for (prefeitura.entities.Processo processo : processos) {
                 prefeitura.entities.Oficio oficio = processo.getIdOficio();
+                prefeitura.entities.Protocolo protocolo = processo.getIdProtocolo();
 
                 String dataFormatada = formato.format(processo.getDataSaidaCompras());
                 String linha[] = {
-                    String.valueOf(oficio.getIdOficio()),
+                    String.valueOf(protocolo.getNumeroProtocolo()),
                     String.valueOf(processo.getNumeroOficio()),
                     String.valueOf(processo.getNumeroProcesso()),
                     dataFormatada,
@@ -179,9 +182,46 @@ public class Processo extends javax.swing.JFrame {
 
         }
     }
-    
-    private void colocarData() {
-        jFormattedTextField1.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+
+    private Protocolo acharProtocolo(Integer numeroProtocolo) {
+
+        try {
+
+            List<Protocolo> protocolos = protocoloController.findProtocoloEntities();
+            for (Protocolo protocolo : protocolos) {
+                if (numeroProtocolo.equals(protocolo.getNumeroProtocolo())) {
+
+                    return protocolo;
+                }
+
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+    }
+
+    private prefeitura.entities.Processo acharProcesso(Integer numeroProcesso) {
+
+        try {
+            List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
+            for (prefeitura.entities.Processo processo : processos) {
+                if (numeroProcesso.equals(processo.getNumeroProcesso())) {
+                    return processo;
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return null;
     }
 
     private void formatarCampo() {
@@ -237,6 +277,7 @@ public class Processo extends javax.swing.JFrame {
         jTextField7 = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
+        jTextField3 = new javax.swing.JTextField();
 
         jDialog1.setTitle("Pesquisa fornecedor");
         jDialog1.setMinimumSize(new java.awt.Dimension(572, 244));
@@ -349,7 +390,8 @@ public class Processo extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setText("Protoco do Ofício");
+        jLabel5.setText("Protocolo Ofício");
+        jLabel5.setRequestFocusEnabled(false);
 
         jButton4.setText("Deletar");
         jButton4.setEnabled(false);
@@ -415,6 +457,7 @@ public class Processo extends javax.swing.JFrame {
 
         jLabel8.setText("Secretaria");
 
+        jTextField5.setEditable(false);
         jTextField5.setEnabled(false);
 
         jLabel9.setText("Descrição");
@@ -438,11 +481,13 @@ public class Processo extends javax.swing.JFrame {
             }
         });
 
-        jFormattedTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jFormattedTextField1ActionPerformed(evt);
+        jFormattedTextField1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jFormattedTextField1MouseClicked(evt);
             }
         });
+
+        jTextField3.setText("jTextField3");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -464,34 +509,39 @@ public class Processo extends javax.swing.JFrame {
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
-                                    .addComponent(jTextField2)
-                                    .addComponent(jTextField5)
-                                    .addComponent(jFormattedTextField1))
-                                .addGap(57, 57, 57)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                        .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(74, 74, 74)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jComboBox1, 0, 145, Short.MAX_VALUE)
-                                    .addComponent(jTextField1)
-                                    .addComponent(jTextField6)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(jTextField4, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
+                                            .addComponent(jTextField2)
+                                            .addComponent(jTextField5)
+                                            .addComponent(jFormattedTextField1))
+                                        .addGap(57, 57, 57)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGap(74, 74, 74)))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(jComboBox1, 0, 145, Short.MAX_VALUE)
+                                            .addComponent(jTextField1)
+                                            .addComponent(jTextField6)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jTextField7, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 175, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(jButton6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(0, 0, Short.MAX_VALUE)))))))
                 .addGap(28, 28, 28))
         );
         layout.setVerticalGroup(
@@ -517,7 +567,9 @@ public class Processo extends javax.swing.JFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(45, 45, 45)
+                        .addGap(13, 13, 13)
+                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -558,33 +610,36 @@ public class Processo extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-//        String dataStr = jTextField3.getText();
-//        String numeroProcesso = jTextField2.getText();
-//        String tipo = (String) jComboBox1.getSelectedItem();
-//        String numeroProtocolo = jTextField4.getText();
-//
-//        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-//
-//        try {
-//            if (dataStr.isEmpty() || numeroProcesso.isEmpty()) {
-//                throw new Exception("Preencha todos os campos");
-//            }
-//            prefeitura.entities.Fornecedor fornecedor = fornecedorController.findFornecedor(Integer.valueOf(jTextField7.getText()));
-//            prefeitura.entities.Oficio protOficio = oficioController.findOficio(Integer.valueOf(numeroProtocolo));
-//            prefeitura.entities.Oficio idOficio = oficioController.findOficio(Integer.valueOf(jTextField4.getText()));
-//
-//            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(idOficio, null, Integer.valueOf(numeroProcesso), tipo, formato.parse(dataStr), fornecedor, protOficio);
-//
-//            processoController.create(processo);
-//            limpar();
-//            atualizarTabela();
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this,
-//                    e.getMessage(),
-//                    "ERRO",
-//                    JOptionPane.ERROR_MESSAGE);
-//
-//        }
+        String dataStr = jFormattedTextField1.getText();
+        String numeroProcesso = jTextField2.getText();
+        String numeroOficio = jTextField5.getText();
+        String tipoProcesso = (String) jComboBox1.getSelectedItem();
+        String numeroProtocolo = jTextField4.getText();
+
+        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+            if (dataStr.isEmpty() || numeroProcesso.isEmpty()) {
+                throw new Exception("Preencha todos os campos");
+            }
+
+            prefeitura.entities.Protocolo protocolo = acharProtocolo(Integer.valueOf(numeroProtocolo));
+
+            prefeitura.entities.Fornecedor fornecedor = fornecedorController.findFornecedor(Integer.valueOf(jTextField7.getText()));
+            prefeitura.entities.Oficio oficio = protocolo.getIdOficio();
+
+            prefeitura.entities.Processo processo = new prefeitura.entities.Processo(Integer.parseInt(numeroProcesso), tipoProcesso, Integer.valueOf(numeroOficio), formato.parse(dataStr), fornecedor, oficio, protocolo);
+
+            processoController.create(processo);
+            limpar();
+            atualizarTabela();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
@@ -597,15 +652,16 @@ public class Processo extends javax.swing.JFrame {
         try {
 
             if (numeroProtocolo.isEmpty()) {
-                throw new Exception("Preencha o campo número de ofício");
+                throw new Exception("Preencha o campo número de protcolo");
             }
-            prefeitura.entities.Protocolo protocolo = ;
-                     
-            
-            
+
+            prefeitura.entities.Protocolo protocolo = acharProtocolo(Integer.valueOf(numeroProtocolo));
+            if (protocolo == null) {
+                throw new Exception("Protocolo não encontrado");
+            }
+            prefeitura.entities.Oficio oficio = protocolo.getIdOficio();
             prefeitura.entities.Secretaria secretaria = oficio.getIdSecretaria();
 
-            jTextField4.setText(String.valueOf(oficio.getIdOficio()));
             jTextField5.setText(String.valueOf(oficio.getNumeroOficio()));
             jTextField6.setText(oficio.getDescricao());
             jTextField1.setText(String.valueOf(secretaria.getNomeSecretaria()));
@@ -657,25 +713,18 @@ public class Processo extends javax.swing.JFrame {
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
 
-        Integer nProcesso = Integer.valueOf(jTextField2.getText());
-        Integer IdProcesso = null;
-        List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
-        
-        for (prefeitura.entities.Processo processo : processos) {
-            if(nProcesso.equals(processo.getNumeroProcesso()) ){
-                IdProcesso = processo.getIdProcesso();
-            } else {
-            }
-                
-                
-        }
-        
-        
         try {
-            if (JOptionPane.showConfirmDialog(this, "Remover o processo " + nProcesso + " ?") == JOptionPane.OK_OPTION) {
-                processoController.destroy(IdProcesso);
+            prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(jTextField2.getText()));
+            Integer numeroProcesso = processo.getNumeroProcesso();
+            Integer idProcesso = processo.getIdProcesso();
+            if (processo == null) {
+                throw new Exception("Processo não encontrado");
+            }
+
+            if (JOptionPane.showConfirmDialog(this, "Remover o processo " + numeroProcesso + " ?") == JOptionPane.OK_OPTION) {
+                processoController.destroy(idProcesso);
                 JOptionPane.showConfirmDialog(this,
-                        "Ofício " + nProcesso + " removido com sucesso",
+                        "Ofício " + numeroProcesso + " removido com sucesso",
                         "SUCESSO",
                         JOptionPane.INFORMATION_MESSAGE);
             }
@@ -691,50 +740,29 @@ public class Processo extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField2ActionPerformed
-
-    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-        if(evt.getClickCount() == 2){
-           int i = jTable1.getSelectedRow();
-            jTextField4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
-            jTextField5.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
-            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());            
-            jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());            
-            jTextField7.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 4).toString());            
-            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString());            
-            jTextField6.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 6).toString());            
-            jButton4.setEnabled(true);
-            jButton5.setEnabled(true);
-            jButton3.setEnabled(false);
-       
-    }
-    
-    }//GEN-LAST:event_jTable1MouseClicked
-
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-//        String dataStr = jTextField3.getText();
-//        String numeroProcesso = jTextField2.getText();
-//        String tipo = (String) jComboBox1.getSelectedItem();
-//        String numeroProtocolo = jTextField4.getText();
-//                
-//        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-//
-//
 //        try {
-//            Date data = formato.parse(dataStr);
-//            if(dataStr.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()){
-//                throw new Exception("Preencha todos os campos");
+//            prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(jTextField2.getText()));
+//            Integer numeroProcesso = processo.getNumeroProcesso();
+//            Integer idProcesso = processo.getIdProcesso();
+//            if (processo == null) {
+//                throw new Exception("Processo não encontrado");
 //            }
-//            prefeitura.entities.Oficio oficio = oficioController.findOficio(IdOficio);
-//            oficio.setNumeroOficio(Integer.valueOf(numeroOficio));
-//            oficio.setDataOficio(data);
-//            oficio.setDescricao(descricao);
-//            oficio.setIdSecretaria(secretaria);
 //            
-//            oficioController.edit(oficio);
-//            limpar();           
+//            prefeitura.entities.Oficio oficio = processo.getIdOficio();
+//            prefeitura.entities.Secretaria secretaria = oficio.getIdSecretaria();
+//            prefeitura.entities.Protocolo protocolo = oficio.getIdProtocolo();
+//            prefeitura.entities.Fornecedor fornecedor = processo.getIdFornecedor();
 //            
+//            
+//            jTextField4.setText(String.valueOf(protocolo.getNumeroProtocolo()));
+//            jTextField5.setText(String.valueOf(oficio.getNumeroOficio()));
+//            jTextField2.setText(String.valueOf(processo.getNumeroProcesso()));
+//            jFormattedTextField1.setText(processo.getDataSaidaCompras().toString());
+//            jTextField7.setText(fornecedor.getIdFornecedor().toString());
+//            jTextField1.setText(secretaria.getIdSecretaria().toString());
+//            jTextField6.setText(oficio.getDescricao());
+//            
+//            jTextField4.setEnabled(false);
 //            
 //        } catch (Exception e) {
 //            JOptionPane.showMessageDialog(this,
@@ -743,12 +771,80 @@ public class Processo extends javax.swing.JFrame {
 //                    JOptionPane.ERROR_MESSAGE);
 //
 //        }
-//        atualizarTabela();
+
+    }//GEN-LAST:event_jTextField2ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+
+        if (evt.getClickCount() == 2) {
+
+            int i = jTable1.getSelectedRow();
+            jTextField4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
+            jTextField5.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
+            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
+            jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
+            jTextField7.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 7).toString());
+            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString());
+            jTextField6.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 6).toString());
+            jButton4.setEnabled(true);
+            jButton5.setEnabled(true);
+            jButton3.setEnabled(false);
+            
+            jTextField4.setEnabled(false);
+            jTextField2.setEnabled(true);
+            jTextField7.setEnabled(true);
+            jFormattedTextField1.setEnabled(true);
+            
+            prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString()));
+            jTextField3.setText(String.valueOf(processo.getNumeroProcesso()));
+        }
+
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+
+        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+
+            String dataStr = jFormattedTextField1.getText();
+            String numeroProcesso = jTextField2.getText();
+            String tipo = (String) jComboBox1.getSelectedItem();
+            String numeroProtocolo = jTextField4.getText();
+            String numeroProcessoAntigo = jTextField3.getText();
+            
+            Date data = formato.parse(dataStr);
+
+            if (numeroProtocolo.isEmpty()) {
+                throw new Exception("Preencha todos os campos");
+            }
+
+            prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(numeroProcessoAntigo));
+            
+            processo.setNumeroProcesso(Integer.parseInt(numeroProcesso));
+            processo.setDataSaidaCompras(data);
+            processo.setTipoProcesso(tipo);
+                        
+
+            processoController.edit(processo);
+            limpar();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+        atualizarTabela();
     }//GEN-LAST:event_jButton5ActionPerformed
 
-    private void jFormattedTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFormattedTextField1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jFormattedTextField1ActionPerformed
+    private void jFormattedTextField1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jFormattedTextField1MouseClicked
+        if (evt.getClickCount() == 2) {
+            formatarCampo();
+            colocarData();
+        }
+    }//GEN-LAST:event_jFormattedTextField1MouseClicked
 
     /**
      * @param args the command line arguments
@@ -810,6 +906,7 @@ public class Processo extends javax.swing.JFrame {
     private javax.swing.JTable jTable2;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;

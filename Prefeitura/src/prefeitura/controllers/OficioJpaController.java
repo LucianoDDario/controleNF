@@ -9,14 +9,15 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import prefeitura.entities.Protocolo;
 import prefeitura.entities.Secretaria;
-import prefeitura.entities.Processo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import prefeitura.controllers.exceptions.NonexistentEntityException;
 import prefeitura.entities.Oficio;
+import prefeitura.entities.Processo;
 
 /**
  *
@@ -34,6 +35,9 @@ public class OficioJpaController implements Serializable {
     }
 
     public void create(Oficio oficio) {
+        if (oficio.getProtocoloList() == null) {
+            oficio.setProtocoloList(new ArrayList<Protocolo>());
+        }
         if (oficio.getProcessoList() == null) {
             oficio.setProcessoList(new ArrayList<Processo>());
         }
@@ -41,11 +45,22 @@ public class OficioJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
+            Protocolo idProtocolo = oficio.getIdProtocolo();
+            if (idProtocolo != null) {
+                idProtocolo = em.getReference(idProtocolo.getClass(), idProtocolo.getIdProtocolo());
+                oficio.setIdProtocolo(idProtocolo);
+            }
             Secretaria idSecretaria = oficio.getIdSecretaria();
             if (idSecretaria != null) {
                 idSecretaria = em.getReference(idSecretaria.getClass(), idSecretaria.getIdSecretaria());
                 oficio.setIdSecretaria(idSecretaria);
             }
+            List<Protocolo> attachedProtocoloList = new ArrayList<Protocolo>();
+            for (Protocolo protocoloListProtocoloToAttach : oficio.getProtocoloList()) {
+                protocoloListProtocoloToAttach = em.getReference(protocoloListProtocoloToAttach.getClass(), protocoloListProtocoloToAttach.getIdProtocolo());
+                attachedProtocoloList.add(protocoloListProtocoloToAttach);
+            }
+            oficio.setProtocoloList(attachedProtocoloList);
             List<Processo> attachedProcessoList = new ArrayList<Processo>();
             for (Processo processoListProcessoToAttach : oficio.getProcessoList()) {
                 processoListProcessoToAttach = em.getReference(processoListProcessoToAttach.getClass(), processoListProcessoToAttach.getIdProcesso());
@@ -53,9 +68,27 @@ public class OficioJpaController implements Serializable {
             }
             oficio.setProcessoList(attachedProcessoList);
             em.persist(oficio);
+            if (idProtocolo != null) {
+                Oficio oldIdOficioOfIdProtocolo = idProtocolo.getIdOficio();
+                if (oldIdOficioOfIdProtocolo != null) {
+                    oldIdOficioOfIdProtocolo.setIdProtocolo(null);
+                    oldIdOficioOfIdProtocolo = em.merge(oldIdOficioOfIdProtocolo);
+                }
+                idProtocolo.setIdOficio(oficio);
+                idProtocolo = em.merge(idProtocolo);
+            }
             if (idSecretaria != null) {
                 idSecretaria.getOficioList().add(oficio);
                 idSecretaria = em.merge(idSecretaria);
+            }
+            for (Protocolo protocoloListProtocolo : oficio.getProtocoloList()) {
+                Oficio oldIdOficioOfProtocoloListProtocolo = protocoloListProtocolo.getIdOficio();
+                protocoloListProtocolo.setIdOficio(oficio);
+                protocoloListProtocolo = em.merge(protocoloListProtocolo);
+                if (oldIdOficioOfProtocoloListProtocolo != null) {
+                    oldIdOficioOfProtocoloListProtocolo.getProtocoloList().remove(protocoloListProtocolo);
+                    oldIdOficioOfProtocoloListProtocolo = em.merge(oldIdOficioOfProtocoloListProtocolo);
+                }
             }
             for (Processo processoListProcesso : oficio.getProcessoList()) {
                 Oficio oldIdOficioOfProcessoListProcesso = processoListProcesso.getIdOficio();
@@ -80,14 +113,29 @@ public class OficioJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             Oficio persistentOficio = em.find(Oficio.class, oficio.getIdOficio());
+            Protocolo idProtocoloOld = persistentOficio.getIdProtocolo();
+            Protocolo idProtocoloNew = oficio.getIdProtocolo();
             Secretaria idSecretariaOld = persistentOficio.getIdSecretaria();
             Secretaria idSecretariaNew = oficio.getIdSecretaria();
+            List<Protocolo> protocoloListOld = persistentOficio.getProtocoloList();
+            List<Protocolo> protocoloListNew = oficio.getProtocoloList();
             List<Processo> processoListOld = persistentOficio.getProcessoList();
             List<Processo> processoListNew = oficio.getProcessoList();
+            if (idProtocoloNew != null) {
+                idProtocoloNew = em.getReference(idProtocoloNew.getClass(), idProtocoloNew.getIdProtocolo());
+                oficio.setIdProtocolo(idProtocoloNew);
+            }
             if (idSecretariaNew != null) {
                 idSecretariaNew = em.getReference(idSecretariaNew.getClass(), idSecretariaNew.getIdSecretaria());
                 oficio.setIdSecretaria(idSecretariaNew);
             }
+            List<Protocolo> attachedProtocoloListNew = new ArrayList<Protocolo>();
+            for (Protocolo protocoloListNewProtocoloToAttach : protocoloListNew) {
+                protocoloListNewProtocoloToAttach = em.getReference(protocoloListNewProtocoloToAttach.getClass(), protocoloListNewProtocoloToAttach.getIdProtocolo());
+                attachedProtocoloListNew.add(protocoloListNewProtocoloToAttach);
+            }
+            protocoloListNew = attachedProtocoloListNew;
+            oficio.setProtocoloList(protocoloListNew);
             List<Processo> attachedProcessoListNew = new ArrayList<Processo>();
             for (Processo processoListNewProcessoToAttach : processoListNew) {
                 processoListNewProcessoToAttach = em.getReference(processoListNewProcessoToAttach.getClass(), processoListNewProcessoToAttach.getIdProcesso());
@@ -96,6 +144,19 @@ public class OficioJpaController implements Serializable {
             processoListNew = attachedProcessoListNew;
             oficio.setProcessoList(processoListNew);
             oficio = em.merge(oficio);
+            if (idProtocoloOld != null && !idProtocoloOld.equals(idProtocoloNew)) {
+                idProtocoloOld.setIdOficio(null);
+                idProtocoloOld = em.merge(idProtocoloOld);
+            }
+            if (idProtocoloNew != null && !idProtocoloNew.equals(idProtocoloOld)) {
+                Oficio oldIdOficioOfIdProtocolo = idProtocoloNew.getIdOficio();
+                if (oldIdOficioOfIdProtocolo != null) {
+                    oldIdOficioOfIdProtocolo.setIdProtocolo(null);
+                    oldIdOficioOfIdProtocolo = em.merge(oldIdOficioOfIdProtocolo);
+                }
+                idProtocoloNew.setIdOficio(oficio);
+                idProtocoloNew = em.merge(idProtocoloNew);
+            }
             if (idSecretariaOld != null && !idSecretariaOld.equals(idSecretariaNew)) {
                 idSecretariaOld.getOficioList().remove(oficio);
                 idSecretariaOld = em.merge(idSecretariaOld);
@@ -103,6 +164,23 @@ public class OficioJpaController implements Serializable {
             if (idSecretariaNew != null && !idSecretariaNew.equals(idSecretariaOld)) {
                 idSecretariaNew.getOficioList().add(oficio);
                 idSecretariaNew = em.merge(idSecretariaNew);
+            }
+            for (Protocolo protocoloListOldProtocolo : protocoloListOld) {
+                if (!protocoloListNew.contains(protocoloListOldProtocolo)) {
+                    protocoloListOldProtocolo.setIdOficio(null);
+                    protocoloListOldProtocolo = em.merge(protocoloListOldProtocolo);
+                }
+            }
+            for (Protocolo protocoloListNewProtocolo : protocoloListNew) {
+                if (!protocoloListOld.contains(protocoloListNewProtocolo)) {
+                    Oficio oldIdOficioOfProtocoloListNewProtocolo = protocoloListNewProtocolo.getIdOficio();
+                    protocoloListNewProtocolo.setIdOficio(oficio);
+                    protocoloListNewProtocolo = em.merge(protocoloListNewProtocolo);
+                    if (oldIdOficioOfProtocoloListNewProtocolo != null && !oldIdOficioOfProtocoloListNewProtocolo.equals(oficio)) {
+                        oldIdOficioOfProtocoloListNewProtocolo.getProtocoloList().remove(protocoloListNewProtocolo);
+                        oldIdOficioOfProtocoloListNewProtocolo = em.merge(oldIdOficioOfProtocoloListNewProtocolo);
+                    }
+                }
             }
             for (Processo processoListOldProcesso : processoListOld) {
                 if (!processoListNew.contains(processoListOldProcesso)) {
@@ -150,10 +228,20 @@ public class OficioJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The oficio with id " + id + " no longer exists.", enfe);
             }
+            Protocolo idProtocolo = oficio.getIdProtocolo();
+            if (idProtocolo != null) {
+                idProtocolo.setIdOficio(null);
+                idProtocolo = em.merge(idProtocolo);
+            }
             Secretaria idSecretaria = oficio.getIdSecretaria();
             if (idSecretaria != null) {
                 idSecretaria.getOficioList().remove(oficio);
                 idSecretaria = em.merge(idSecretaria);
+            }
+            List<Protocolo> protocoloList = oficio.getProtocoloList();
+            for (Protocolo protocoloListProtocolo : protocoloList) {
+                protocoloListProtocolo.setIdOficio(null);
+                protocoloListProtocolo = em.merge(protocoloListProtocolo);
             }
             List<Processo> processoList = oficio.getProcessoList();
             for (Processo processoListProcesso : processoList) {
