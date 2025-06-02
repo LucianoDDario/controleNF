@@ -4,6 +4,7 @@
  */
 package prefeitura.view;
 
+import java.awt.FocusTraversalPolicy;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,6 +30,8 @@ public class Processo extends javax.swing.JFrame {
     ProcessoJpaController processoController;
     FornecedorJpaController fornecedorController;
     ProtocoloJpaController protocoloController;
+    
+    
 
     public Processo() {
         initComponents();
@@ -36,6 +39,8 @@ public class Processo extends javax.swing.JFrame {
         atualizarTabela();
         limpar();
         atualizarTabelaFornecedor();
+        
+        
     }
 
     public void campoFornecedor() {
@@ -224,6 +229,9 @@ public class Processo extends javax.swing.JFrame {
         return null;
     }
 
+        
+     
+
     private void formatarCampo() {
         try {
             MaskFormatter formatter = new MaskFormatter("##/##/####");
@@ -353,8 +361,9 @@ public class Processo extends javax.swing.JFrame {
                 .addGap(19, 19, 19))
         );
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Cadastro de Processo");
+        setPreferredSize(new java.awt.Dimension(791, 516));
 
         jLabel2.setText("Número do Processo");
 
@@ -373,6 +382,11 @@ public class Processo extends javax.swing.JFrame {
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton1MouseClicked(evt);
+            }
+        });
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
             }
         });
 
@@ -494,12 +508,12 @@ public class Processo extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap(28, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addComponent(jButton1))
+                        .addComponent(jButton1)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(28, 28, 28)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane5)
                             .addGroup(layout.createSequentialGroup()
@@ -541,15 +555,15 @@ public class Processo extends javax.swing.JFrame {
                                             .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(0, 0, Short.MAX_VALUE)))))))
-                .addGap(28, 28, 28))
+                                        .addGap(0, 0, Short.MAX_VALUE)))))
+                        .addContainerGap(28, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(16, 16, 16)
+                .addContainerGap(19, Short.MAX_VALUE)
                 .addComponent(jButton1)
-                .addGap(21, 21, 21)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -845,6 +859,10 @@ public class Processo extends javax.swing.JFrame {
             colocarData();
         }
     }//GEN-LAST:event_jFormattedTextField1MouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments

@@ -4,19 +4,18 @@
  */
 package prefeitura.view;
 
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.MaskFormatter;
-import javax.swing.text.NumberFormatter;
 import prefeitura.controllers.*;
 import prefeitura.entities.Protocolo;
 
@@ -48,6 +47,7 @@ public class NotaFiscal extends javax.swing.JFrame {
     }
 
     private void atualizarTabela() {
+
         ((DefaultTableModel) jTable1.getModel()).setRowCount(0);
         try {
             List<prefeitura.entities.Notafiscal> notasFiscais = notaFiscalController.findNotafiscalEntities();
@@ -59,15 +59,29 @@ public class NotaFiscal extends javax.swing.JFrame {
 
                 String dataProtocoloFormatada = formato.format(protocolo.getDataProtocolo());
                 String dataNotaFormatada = formato.format(notaFiscal.getDataEmissao());
+                String dataChegadaFormatada = formato.format(notaFiscal.getDataChegada());
+                String valorNota = String.valueOf(notaFiscal.getValorNota());
+
+                if (Integer.parseInt(valorNota) < 100) {
+                    valorNota = "0," + valorNota;
+                } else {
+                    String valorTextoCentavos = valorNota.substring(valorNota.length() - 2);
+                    String valorTextoReais = valorNota.substring(0, valorNota.length() - 2);
+
+                    valorNota = valorTextoReais + "," + valorTextoCentavos;
+                }
+
                 String linha[] = {
                     String.valueOf(notaFiscal.getIdNotaFiscal()),
+                    dataChegadaFormatada,
                     String.valueOf(protocolo.getNumeroProtocolo()),
                     dataProtocoloFormatada,
                     String.valueOf(notaFiscal.getNumeroNota()),
+                    valorNota,
                     dataNotaFormatada,
-                    String.valueOf(notaFiscal.getValorNota()),
                     String.valueOf(notaFiscal.getIdProcesso().getNumeroProcesso())};
                 ((DefaultTableModel) jTable1.getModel()).addRow(linha);
+
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -80,9 +94,14 @@ public class NotaFiscal extends javax.swing.JFrame {
 
     private void limpar() {
         jFormattedTextField1.setText("");
+        jFormattedTextField2.setText("");
+        jFormattedTextField3.setText("");
+        jFormattedTextField4.setText("");
+        jTextField1.setText("");
         jTextField2.setText("");
         jTextField3.setText("");
-        jFormattedTextField2.setText("");
+        jTextField4.setText("");
+
         atualizarTabela();
 
         jButton3.setEnabled(true);
@@ -90,7 +109,7 @@ public class NotaFiscal extends javax.swing.JFrame {
         jButton6.setEnabled(true);
         jButton5.setEnabled(false);
         formatarCampo();
-        
+
         jTextField1.requestFocus();
     }
 
@@ -110,11 +129,10 @@ public class NotaFiscal extends javax.swing.JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    
 
     private void colocarData() {
-        jFormattedTextField1.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
-        jFormattedTextField2.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        jFormattedTextField4.setText(String.valueOf(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+
     }
 
     private prefeitura.entities.Processo acharProcesso(Integer numeroProcesso) {
@@ -158,12 +176,34 @@ public class NotaFiscal extends javax.swing.JFrame {
         return null;
     }
 
+    private void formatarDinheiro() {
+        String valorTexto = jFormattedTextField3.getText().replaceAll("[^0-9]", "");
+
+        while (valorTexto.length() < 2) {
+            valorTexto = "0" + valorTexto;
+        }
+
+        if (valorTexto.length() >= 2) {
+            valorTexto = valorTexto.replaceFirst("^0+(?!$)", "");
+
+            String valorTextoCentavos = valorTexto.substring(valorTexto.length() - 2);
+            String valorTextoReais = valorTexto.substring(0, valorTexto.length() - 2);
+
+            String valorTextoFormatado = valorTextoReais + "," + valorTextoCentavos;
+            jFormattedTextField3.setText(valorTextoFormatado);
+        } else {
+
+            jFormattedTextField3.setText("0," + valorTexto);
+        }
+
+    }
+
     public NotaFiscal() {
         initComponents();
         abrirConexao();
         limpar();
         colocarData();
-       
+
     }
 
     /**
@@ -197,22 +237,28 @@ public class NotaFiscal extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jTextField4 = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                formMouseMoved(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "ID", "Protocolo", "Data Protocolo", "Número da Nota", "Valor", "Data da Nota", "Processo"
+                "ID", "Data de Chegada", "Protocolo", "Data Protocolo", "Número da Nota", "Valor", "Data da Nota", "Processo"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -283,7 +329,11 @@ public class NotaFiscal extends javax.swing.JFrame {
 
         jLabel6.setText("Valor da Nota");
 
-        jFormattedTextField3.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("¤#,##0.00"))));
+        jFormattedTextField3.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jFormattedTextField3KeyReleased(evt);
+            }
+        });
 
         jLabel7.setText("Data de Chegada");
 
@@ -292,14 +342,21 @@ public class NotaFiscal extends javax.swing.JFrame {
 
         jLabel8.setText("ID");
 
+        jButton1.setText("Voltar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 717, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -335,13 +392,18 @@ public class NotaFiscal extends javax.swing.JFrame {
                                     .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jFormattedTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addContainerGap())
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(48, 48, 48)
+                .addContainerGap(35, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -379,9 +441,9 @@ public class NotaFiscal extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jFormattedTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                .addGap(45, 45, 45)
                 .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         pack();
@@ -393,13 +455,14 @@ public class NotaFiscal extends javax.swing.JFrame {
 
             int i = jTable1.getSelectedRow();
             jTextField4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 0).toString());
-            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
-            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
-            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 6).toString());
-            jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
-            jFormattedTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 4).toString());
-            jFormattedTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString());
-
+            jTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 2).toString());
+            jTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 4).toString());
+            jTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 7).toString());
+            jFormattedTextField1.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 3).toString());
+            jFormattedTextField2.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 6).toString());
+            jFormattedTextField3.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 5).toString().replaceAll("[^0-9]", ""));
+            jFormattedTextField4.setText(((DefaultTableModel) jTable1.getModel()).getValueAt(i, 1).toString());
+            formatarDinheiro();
             jButton4.setEnabled(true);
             jButton5.setEnabled(true);
             jButton3.setEnabled(false);
@@ -416,6 +479,8 @@ public class NotaFiscal extends javax.swing.JFrame {
         String numeroProcesso = jTextField3.getText();
         String valorNota = jFormattedTextField3.getText();
 
+        valorNota = valorNota.replaceAll("[^0-9]", "");
+
         SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
 
         try {
@@ -423,19 +488,19 @@ public class NotaFiscal extends javax.swing.JFrame {
                 throw new Exception("Preencha o número de protocolo");
 
             }
-            
+
             List<prefeitura.entities.Notafiscal> notasFiscais = notaFiscalController.findNotafiscalEntities();
             List<prefeitura.entities.Processo> processos = processoController.findProcessoEntities();
             for (prefeitura.entities.Notafiscal notaFiscal : notasFiscais) {
                 for (prefeitura.entities.Processo processo : processos) {
-                    if (Integer.valueOf(numeroNota).equals(notaFiscal.getNumeroNota()) && notaFiscal.getIdFornecedor().equals(processo.getIdFornecedor())){
-                    throw new Exception("Numero de nota já existe para este fornecedor");
-                }
-                
+                    if (Integer.valueOf(numeroNota).equals(notaFiscal.getNumeroNota()) && notaFiscal.getIdFornecedor().equals(processo.getIdFornecedor())) {
+                        throw new Exception("Numero de nota já existe para este fornecedor");
+                    }
+
                 }
 
             }
-            
+
             List<prefeitura.entities.Protocolo> protocolos = protocoloController.findProtocoloEntities();
             for (prefeitura.entities.Protocolo protocolo : protocolos) {
                 if (Integer.valueOf(numeroProtocolo).equals(protocolo.getNumeroProtocolo())) {
@@ -449,7 +514,6 @@ public class NotaFiscal extends javax.swing.JFrame {
             if (dataProtocolo.isEmpty() || dataEmissao.isEmpty() || numeroNota.isEmpty() || numeroProcesso.isEmpty() || dataChegada.isEmpty() || valorNota.isEmpty()) {
                 throw new Exception("Preencha todos os campos");
             }
-            
 
             protocolo = acharProtocolo(Integer.valueOf(numeroProtocolo));
             prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(numeroProcesso));
@@ -482,7 +546,7 @@ public class NotaFiscal extends javax.swing.JFrame {
 
                 Integer idProtocolo = notaFiscalController.findNotafiscal(IdNotaFiscal).getIdProtocolo().getIdProtocolo();
                 notaFiscalController.destroy(IdNotaFiscal);
-                notaFiscalController.destroy(idProtocolo);
+                protocoloController.destroy(idProtocolo);
 
                 JOptionPane.showConfirmDialog(this,
                         "Ofício " + numeroNota + " removido com sucesso",
@@ -501,41 +565,121 @@ public class NotaFiscal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-//        Integer IdOficio = Integer.valueOf(jTextField1.getText());
-//        String dataStr = jFormattedTextField1.getText();
-//        String numeroOficio = jTextField2.getText();
-//        String descricao = jTextField3.getText();
-//        Secretaria secretaria = (Secretaria) jComboBox1.getSelectedItem();
-//
-//        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
-//
-//        try {
-//            Date data = formato.parse(dataStr);
-//            if (dataStr.isEmpty() || numeroOficio.isEmpty() || descricao.isEmpty()) {
-//                throw new Exception("Preencha todos os campos");
-//            }
-//            prefeitura.entities.Oficio oficio = oficioController.findOficio(IdOficio);
-//            oficio.setNumeroOficio(Integer.parseInt(numeroOficio));
-//            oficio.setDataOficio(data);
-//            oficio.setDescricao(descricao);
-//            oficio.setIdSecretaria(secretaria);
-//
-//            oficioController.edit(oficio);
-//            limpar();
-//
-//        } catch (Exception e) {
-//            JOptionPane.showMessageDialog(this,
-//                    e.getMessage(),
-//                    "ERRO",
-//                    JOptionPane.ERROR_MESSAGE);
-//
-//        }
-//        atualizarTabela();
+        String IdNota = jTextField4.getText();
+        String numeroProtocolo = jTextField1.getText();
+        String dataProtocoloStr = jFormattedTextField1.getText();
+        String numeroNota = jTextField2.getText();
+        String dataNotaStr = jFormattedTextField2.getText();
+        String dataChegadaStr = jFormattedTextField4.getText();
+        String valorNota = jFormattedTextField3.getText();
+        String numeroProcesso = jTextField3.getText();
+
+        valorNota = valorNota.replaceAll("[^0-9]", "");
+
+        SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+
+            if (dataProtocoloStr.isEmpty() || numeroProtocolo.isEmpty() || numeroNota.isEmpty()) {
+                throw new Exception("Preencha todos os campos");
+            }
+            Date dataProtocolo = formato.parse(dataProtocoloStr);
+            Date dataChegada = formato.parse(dataChegadaStr);
+            Date dataNota = formato.parse(dataNotaStr);
+
+            prefeitura.entities.Notafiscal notaFiscal = notaFiscalController.findNotafiscal(Integer.valueOf(IdNota));
+            prefeitura.entities.Protocolo protocolo = acharProtocolo(notaFiscal.getIdProtocolo().getNumeroProtocolo());
+            prefeitura.entities.Processo processo = acharProcesso(Integer.valueOf(numeroProcesso));
+            if (processo == null) {
+                throw new Exception("Processo não encontrado");
+            }
+
+            notaFiscal.setNumeroNota(Integer.valueOf(numeroNota));
+            protocolo.setNumeroProtocolo(Integer.valueOf(numeroProtocolo));
+            protocolo.setDataProtocolo(dataProtocolo);
+            notaFiscal.setIdProtocolo(protocolo);
+            notaFiscal.setDataChegada(dataChegada);
+            notaFiscal.setDataEmissao(dataNota);
+            notaFiscal.setValorNota(Integer.valueOf(valorNota));
+            notaFiscal.setIdProcesso(processo);
+
+            protocoloController.edit(protocolo);
+            notaFiscalController.edit(notaFiscal);
+            limpar();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "ERRO26",
+                    JOptionPane.ERROR_MESSAGE);
+
+        }
+        atualizarTabela();
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         limpar();
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void formMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseMoved
+        if (jFormattedTextField1.getText().isEmpty()) {
+            try {
+                MaskFormatter formatter = new MaskFormatter("##/##/####");
+                formatter.setPlaceholderCharacter('_');
+                jFormattedTextField1.setFormatterFactory(new DefaultFormatterFactory(formatter));
+
+            } catch (Exception e) {
+
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(),
+                        "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        if (jFormattedTextField2.getText().isEmpty()) {
+            try {
+                MaskFormatter formatter = new MaskFormatter("##/##/####");
+                formatter.setPlaceholderCharacter('_');
+                jFormattedTextField2.setFormatterFactory(new DefaultFormatterFactory(formatter));
+
+            } catch (Exception e) {
+
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(),
+                        "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        if (jFormattedTextField4.getText().isEmpty()) {
+            try {
+                MaskFormatter formatter = new MaskFormatter("##/##/####");
+                formatter.setPlaceholderCharacter('_');
+                jFormattedTextField4.setFormatterFactory(new DefaultFormatterFactory(formatter));
+
+            } catch (Exception e) {
+
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(),
+                        "ERRO",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_formMouseMoved
+
+    private void jFormattedTextField3KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jFormattedTextField3KeyReleased
+
+        if (jFormattedTextField3.getText().replaceAll("[^0-9]", "").length() > 1) {
+            formatarDinheiro();
+        }
+
+
+    }//GEN-LAST:event_jFormattedTextField3KeyReleased
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -573,6 +717,7 @@ public class NotaFiscal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
